@@ -1,7 +1,12 @@
 node_modules
-# Keep environment variables out of version control
+dist
 .env
+.vercel
 
-/src/generated/prisma
 
-/generated/prisma
+# git remote add origin https://github.com/ronyislam502/car-fixed-server.git
+
+# https://car-fixed-server.vercel.app/
+.vercel
+
+.vercel
