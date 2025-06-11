@@ -13,3 +13,32 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  DOCTOR
+  PATIENT
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum BloodGroup {
+  A_POSITIVE  @map("A+")
+  B_POSITIVE  @map("B+")
+  O_POSITIVE  @map("O+")
+  AB_POSITIVE @map("AB+")
+  A_NEGATIVE  @map("A-")
+  B_NEGATIVE  @map("B-")
+  O_NEGATIVE  @map("O-")
+  AB_NEGATIVE @map("AB-")
+}
