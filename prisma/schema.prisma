@@ -42,3 +42,8 @@ enum BloodGroup {
   O_NEGATIVE  @map("O-")
   AB_NEGATIVE @map("AB-")
 }
+
+enum MaritalStatus {
+  MARRIED
+  UNMARRIED
+}
