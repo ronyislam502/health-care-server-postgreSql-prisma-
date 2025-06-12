@@ -1,7 +1,8 @@
 import prisma from "../../shared/prisma";
 import QueryBuilder from "../../shared/queryBuilder";
 
-const getAllAdminsFromDB = async (query: Record<string, unknown> = {}) => {
+const getAllAdminsFromDB = async (query: Record<string, unknown>) => {
+ 
   const searchableFields = ["name", "email"];
 
   const queryBuilder = new QueryBuilder(prisma.admin, query)
@@ -11,10 +12,10 @@ const getAllAdminsFromDB = async (query: Record<string, unknown> = {}) => {
     .paginate()
     .fields();
 
-  const users = await queryBuilder.execute();
+  const admins = await queryBuilder.execute();
   const meta = await queryBuilder.countTotal();
 
-  return { meta, data: users };
+  return { meta, data:admins };
 };
 
 export const AdminServices = {

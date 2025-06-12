@@ -4,12 +4,13 @@ import { AdminServices } from "./admin.service";
 import httpStatus from "http-status";
 
 const getAllAdmins = catchAsync(async (req, res) => {
-  const result = await AdminServices.getAllAdminsFromDB();
+  const query = { ...req.query };
+  const result = await AdminServices.getAllAdminsFromDB(query);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Users retrieved successfully",
+    message: "Admins retrieved successfully",
     meta: result.meta,
     data: result.data,
   });

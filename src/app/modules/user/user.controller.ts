@@ -16,12 +16,13 @@ const {password, admin}=req.body
 })
 
 const getAllUsers = catchAsync (async(req, res) =>{
-  const result = await UserServices.getAllUsersFromDB();
+  const query = { ...req.query };
+  const result = await UserServices.getAllUsersFromDB(query);
 
   sendResponse(res, {
     statusCode:httpStatus.OK,
     success:true,
-    message:"Users retreived successfully",
+    message:"Users retrieved successfully",
     meta:result.meta,
     data:result.data
   })

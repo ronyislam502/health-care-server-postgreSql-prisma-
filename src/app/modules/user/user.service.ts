@@ -1,13 +1,11 @@
-import { UserRole } from "../../../../generated/prisma";
 import bcrypt from "bcrypt";
-import { TUser } from "./user.interface";
 import prisma, { TransactionClient } from "../../shared/prisma";
-import { TAdmin } from "../admin/admin.interface";
 import QueryBuilder from "../../shared/queryBuilder";
+import { Admin, UserRole } from "@prisma/client";
 
 
 
-const CreateAdminIntoDB = async (password:string, payload:TAdmin) => {
+const CreateAdminIntoDB = async (password:string, payload:Admin) => {
   // console.log("admin", payload)
   const hashedPassword = await bcrypt.hash(password, 12);
   // console.log("pass", hashedPassword)
@@ -34,8 +32,8 @@ const CreateAdminIntoDB = async (password:string, payload:TAdmin) => {
   return result;
 };
 
-const getAllUsersFromDB = async (query: Record<string, unknown> = {}) => {
-  const searchableFields = ["name", "email"];
+const getAllUsersFromDB = async (query: Record<string, unknown>) => {
+  const searchableFields = ["role", "email"];
 
   const queryBuilder = new QueryBuilder(prisma.user, query)
     .search(searchableFields)
