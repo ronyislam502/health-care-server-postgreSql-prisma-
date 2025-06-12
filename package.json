@@ -19,11 +19,14 @@
     "prisma:studio": "prisma studio"
   },
   "dependencies": {
+    "@prisma/client": "^6.9.0",
     "@types/node": "^24.0.0",
     "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "http-status": "^2.1.0",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.20.1",
     "typescript": "^5.8.3",
@@ -31,9 +34,17 @@
   },
   "keywords": [],
   "devDependencies": {
+    "@eslint/js": "^9.28.0",
     "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
-    "prisma": "^6.9.0"
+    "@typescript-eslint/eslint-plugin": "^8.34.0",
+    "@typescript-eslint/parser": "^8.34.0",
+    "eslint": "^9.28.0",
+    "globals": "^16.2.0",
+    "prettier": "^3.5.3",
+    "prisma": "^6.9.0",
+    "typescript-eslint": "^8.34.0"
   }
 }

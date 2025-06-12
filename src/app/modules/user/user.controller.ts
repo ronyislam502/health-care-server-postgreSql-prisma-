@@ -1,0 +1,22 @@
+import catchAsync from "../../shared/catchAsync";
+import sendResponse from "../../shared/sendResponse";
+import { UserServices } from "./user.service";
+import httpStatus from "http-status";
+
+const CreateAdmin = catchAsync(async(req, res) => {
+const {password, admin}=req.body
+ const result = await UserServices.CreateAdminIntoDB(password, admin);
+
+ sendResponse(res, {
+   statusCode: httpStatus.OK,
+   success:true,
+   message:"Admin Created Successfully",
+   data:result
+ });
+})
+
+
+
+export const UserControllers = {
+  CreateAdmin,
+};
