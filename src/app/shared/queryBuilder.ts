@@ -109,13 +109,13 @@ class QueryBuilder<T> {
       typeof this.query.page === "string" ? parseInt(this.query.page) : 1;
     const limit =
       typeof this.query.limit === "string" ? parseInt(this.query.limit) : 10;
-    const totalPages = Math.ceil(total / limit);
+    const totalPage = Math.ceil(total / limit);
 
     return {
       page,
       limit,
       total,
-      totalPages,
+      totalPage,
     };
   }
 
