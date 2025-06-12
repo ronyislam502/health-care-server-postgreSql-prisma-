@@ -5,4 +5,6 @@ const router=Router()
 
 router.post("/create-admin", UserControllers.CreateAdmin)
 
-export const UserRoutes=router;
+router.get("/", UserControllers.getAllUsers);
+
+export const UserRoutes = router;

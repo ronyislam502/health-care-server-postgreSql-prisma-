@@ -6,12 +6,12 @@ import { TAdmin } from "../admin/admin.interface";
 
 
 
-const CreateAdminIntoDB = async(password:string, payload:TAdmin) => {
+const CreateAdminIntoDB = async (password:string, payload:TAdmin) => {
   // console.log("admin", payload)
   const hashedPassword = await bcrypt.hash(password, 12);
   // console.log("pass", hashedPassword)
 
-  const userData = {
+  const userData : Partial <TUser> = {
     email: payload.email,
     password: hashedPassword,
     role: UserRole?.ADMIN,
@@ -33,6 +33,13 @@ const CreateAdminIntoDB = async(password:string, payload:TAdmin) => {
   return result;
 };
 
+const getAllUsersFromDB = async() =>{
+  const result=await prisma.user.findMany();
+
+  return result;
+}
+
 export const UserServices = {
   CreateAdminIntoDB,
+  getAllUsersFromDB,
 };

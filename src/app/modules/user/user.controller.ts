@@ -15,8 +15,19 @@ const {password, admin}=req.body
  });
 })
 
+const getAllUsers = catchAsync (async(req, res) =>{
+  const result = await UserServices.getAllUsersFromDB();
+
+  sendResponse(res, {
+    statusCode:httpStatus.OK,
+    success:true,
+    message:"Users retreived successfully",
+    data:result
+  })
+})
 
 
 export const UserControllers = {
   CreateAdmin,
+  getAllUsers,
 };
