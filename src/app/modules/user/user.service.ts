@@ -2,10 +2,12 @@ import bcrypt from "bcrypt";
 import prisma, { TransactionClient } from "../../shared/prisma";
 import QueryBuilder from "../../shared/queryBuilder";
 import { Admin, UserRole } from "@prisma/client";
+import { userSearchableFields } from "./user.interface";
 
-
-
-const CreateAdminIntoDB = async (password:string, payload:Admin) => {
+const CreateAdminIntoDB = async (
+  password: string,
+  payload: Admin
+): Promise<Admin> => {
   // console.log("admin", payload)
   const hashedPassword = await bcrypt.hash(password, 12);
   // console.log("pass", hashedPassword)
@@ -33,10 +35,8 @@ const CreateAdminIntoDB = async (password:string, payload:Admin) => {
 };
 
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {
-  const searchableFields = ["role", "email"];
-
   const queryBuilder = new QueryBuilder(prisma.user, query)
-    .search(searchableFields)
+    .search(userSearchableFields)
     .filter()
     .sort()
     .paginate()
@@ -48,7 +48,18 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
   return { meta, data: users };
 };
 
+const getSingleUserFromDB = async (id: string) => {
+  const result = await prisma.user.findUniqueOrThrow({
+    where: {
+      id,
+    },
+  });
+
+  return result;
+};
+
 export const UserServices = {
   CreateAdminIntoDB,
   getAllUsersFromDB,
+  getSingleUserFromDB,
 };

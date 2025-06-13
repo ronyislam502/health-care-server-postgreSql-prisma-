@@ -16,6 +16,19 @@ const getAllAdmins = catchAsync(async (req, res) => {
   });
 });
 
+const getSingleAdmin = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await AdminServices.getSingleAdminFromDB(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Admin retrieved successfully",
+    data: result,
+  });
+});
+
 export const AdminControllers = {
   getAllAdmins,
+  getSingleAdmin,
 };

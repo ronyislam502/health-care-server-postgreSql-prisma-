@@ -18,31 +18,16 @@ class QueryBuilder<T> {
   }
 
   // Search by searchable fields with Prisma's 'contains' and insensitive mode
-  //   search(searchableFields: string[]) {
-  //     const searchTerm = this.query.searchTerm;
-  //     if (typeof searchTerm === "string" && searchableFields.length > 0) {
-  //       this.where.OR = searchableFields.map((field) => ({
-  //         [field]: {
-  //           contains: searchTerm,
-  //           mode: "insensitive",
-  //         },
-  //       }));
-  //     }
-  //     return this;
-  //   }
 
-  search(searchableFields: string[]) {
+  search(searchableFields: { field: string; isEnum: boolean }[]) {
     const searchTerm = this.query.searchTerm;
 
-    // Define enum fields here manually
-    const enumFields = ["status", "role"];
-
     if (typeof searchTerm === "string" && searchableFields.length > 0) {
-      this.where.OR = searchableFields.map((field) => {
-        if (enumFields.includes(field)) {
+      this.where.OR = searchableFields.map(({ field, isEnum }) => {
+        if (isEnum) {
           return {
             [field]: {
-              equals: searchTerm.toUpperCase(),
+              equals: searchTerm, // or searchTerm.toUpperCase() if needed
             },
           };
         } else {
