@@ -17,7 +17,11 @@ const handlePrismaValidationError = (error: any): TGenericErrorResponse => {
     error.code === "P2003"
   ) {
     // Try to get the field or constraint name from error.meta
-    const field = error.meta?.field_name || error.meta?.constraint_name || "";
+    const field =
+      error.meta?.field_name ||
+      error.meta?.constraint_name ||
+      error.meta?.target?.[0] ||
+      "";
 
     errorSources.push({
       path: field,

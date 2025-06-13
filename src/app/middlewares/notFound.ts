@@ -5,7 +5,10 @@ const notFound = (req: Request, res: Response, next: NextFunction): void => {
   res.status(httpStatus.NOT_FOUND).json({
     success: false,
     message: "API NOT FOUND !!",
-    error: "",
+    error: {
+      path: req.originalUrl,
+      message: "Please provide right api",
+    },
   });
 };
 

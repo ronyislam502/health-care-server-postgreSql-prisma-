@@ -14,11 +14,11 @@ app.use(cookieParser());
 //parser
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/", (req: Request, res: Response) => {
-  res.send({
-    message: "Health-Care server",
-  });
-});
+const getController = (req: Request, res: Response) => {
+  res.send("Health Care app");
+};
+
+app.get("/", getController);
 
 app.use("/api/v1", router);
 
