@@ -1,11 +1,13 @@
 import { UserStatus } from "@prisma/client";
 import config from "../../config";
 import AppError from "../../errors/AppError";
-import { createToken } from "../../shared/jwtHelpers";
+// import { createToken } from "../../shared/jwtHelpers";
 import prisma from "../../shared/prisma";
 import { TLoginUser } from "./auth.interface";
 import httpStatus from "http-status";
 import bcrypt from "bcrypt";
+import { SignOptions } from "jsonwebtoken";
+import { createToken } from "../../shared/jwtHelpers";
 
 const loginUserFromDB = async (payload: TLoginUser) => {
   const user = await prisma.user.findUnique({
@@ -43,13 +45,13 @@ const loginUserFromDB = async (payload: TLoginUser) => {
   const accessToken = createToken(
     jwtPayload,
     config.jwt_access_Token_secrete as string,
-    config.jwt_access_token_expire_in as string
+    config.jwt_access_token_expire_in as SignOptions["expiresIn"]
   );
 
   const refreshToken = createToken(
     jwtPayload,
     config.jwt_refresh_token_secrete as string,
-    config.jwt_refresh_token_expire_in as string
+    config.jwt_refresh_token_expire_in as SignOptions["expiresIn"]
   );
 
   return {
