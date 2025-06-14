@@ -1,4 +1,5 @@
 import { TErrorSources, TGenericErrorResponse } from "../interface/error";
+import httpStatus from "http-status";
 
 const handlePrismaCastError = (error: any): TGenericErrorResponse => {
   // Handle only Prisma cast error (P2023)
@@ -10,7 +11,7 @@ const handlePrismaCastError = (error: any): TGenericErrorResponse => {
   ];
 
   return {
-    statusCode: 400,
+    statusCode: httpStatus.BAD_REQUEST,
     message: "Invalid Error",
     errorSources,
   };

@@ -22,32 +22,48 @@ const globalErrorHandler: ErrorRequestHandler = (error, req, res, next) => {
     },
   ];
 
-  // Helper function to set error details from a handler result
-  const setError = (simplifiedError: {
-    statusCode: number;
-    message: string;
-    errorSources: TErrorSources;
-  }) => {
+  // Zod validation error
+  if (error instanceof ZodError) {
+    const simplifiedError = handleZodError(error);
     statusCode = simplifiedError.statusCode;
     message = simplifiedError.message;
     errorSources = simplifiedError.errorSources;
-  };
 
-  if (error instanceof ZodError) {
-    setError(handleZodError(error));
-  } else if (error instanceof Prisma.PrismaClientValidationError) {
-    setError(handlePrismaValidationError(error));
+    // Prisma known validation/cast constraint errors
   } else if (
     error.code === "P2000" ||
     error.code === "P2018" ||
     error.code === "P2003" ||
+    error.code === "P2023" ||
     error.code === "P2025"
   ) {
-    setError(handlePrismaValidationError(error));
+    const simplifiedError = handlePrismaValidationError(error);
+    statusCode = simplifiedError.statusCode;
+    message = simplifiedError.message;
+    errorSources = simplifiedError.errorSources;
+
+    // Prisma client validation error (e.g. required field missing)
+  } else if (error instanceof Prisma.PrismaClientValidationError) {
+    const simplifiedError = handlePrismaValidationError(error);
+    statusCode = simplifiedError.statusCode;
+    message = simplifiedError.message;
+    errorSources = simplifiedError.errorSources;
+
+    // Prisma cast error (invalid ID or UUID)
   } else if (error.code === "P2023") {
-    setError(handlePrismaCastError(error));
+    const simplifiedError = handlePrismaCastError(error);
+    statusCode = simplifiedError.statusCode;
+    message = simplifiedError.message;
+    errorSources = simplifiedError.errorSources;
+
+    // Duplicate field (e.g. email already exists)
   } else if (error.code === "P2002") {
-    setError(handleDuplicateError(error));
+    const simplifiedError = handleDuplicateError(error);
+    statusCode = simplifiedError.statusCode;
+    message = simplifiedError.message;
+    errorSources = simplifiedError.errorSources;
+
+    // Manually thrown custom AppError
   } else if (error instanceof AppError) {
     statusCode = error.statusCode;
     message = error.message;
@@ -57,6 +73,8 @@ const globalErrorHandler: ErrorRequestHandler = (error, req, res, next) => {
         message: error.message,
       },
     ];
+
+    // Native JavaScript error
   } else if (error instanceof Error) {
     message = error.message;
     errorSources = [
