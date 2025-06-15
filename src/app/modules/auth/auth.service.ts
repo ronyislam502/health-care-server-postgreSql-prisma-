@@ -1,14 +1,12 @@
 import { UserStatus } from "@prisma/client";
 import config from "../../config";
 import AppError from "../../errors/AppError";
-// import { createToken } from "../../shared/jwtHelpers";
 import prisma from "../../shared/prisma";
 import { TLoginUser } from "./auth.interface";
 import httpStatus from "http-status";
-import bcrypt from "bcrypt";
-import { SignOptions } from "jsonwebtoken";
+import { JwtPayload, SignOptions } from "jsonwebtoken";
 import { createToken, verifyToken } from "../../shared/jwtHelpers";
-import { comparePasswords } from "../../shared/bcryptHelpers";
+import { comparePasswords, hashPassword } from "../../shared/bcryptHelpers";
 
 const loginUserFromDB = async (payload: TLoginUser) => {
   const user = await prisma.user.findUnique({
@@ -104,7 +102,48 @@ const refreshTokenFromDB = async (token: string) => {
   };
 };
 
+const changePasswordIntoDB = async (
+  userData: JwtPayload,
+  payload: { oldPassword: string; newPassword: string }
+) => {
+  const user = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: userData?.email,
+      status: UserStatus.ACTIVE,
+    },
+  });
+
+  const isCorrectPassword = await comparePasswords(
+    userData.password,
+    user.password as string
+  );
+
+  if (!isCorrectPassword) {
+    throw new AppError(httpStatus.FORBIDDEN, "Password do not matched");
+  }
+
+  const passwordHashed = await hashPassword(
+    payload.newPassword,
+    config.bcrypt_salt_rounds as string
+  );
+
+  await prisma.user.update({
+    where: {
+      email: userData.email,
+      role: userData.role,
+    },
+    data: {
+      password: passwordHashed,
+      needPasswordChange: false,
+      passwordChangedAt: new Date(),
+    },
+  });
+
+  return null;
+};
+
 export const AuthServices = {
   loginUserFromDB,
   refreshTokenFromDB,
+  changePasswordIntoDB,
 };

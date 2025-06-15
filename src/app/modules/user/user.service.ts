@@ -3,13 +3,17 @@ import QueryBuilder from "../../shared/queryBuilder";
 import { Admin, UserRole } from "@prisma/client";
 import { userSearchableFields } from "./user.interface";
 import { hashPassword } from "../../shared/bcryptHelpers";
+import config from "../../config";
 
 const CreateAdminIntoDB = async (
   password: string,
   payload: Admin
 ): Promise<Admin> => {
   // console.log("admin", payload)
-  const hashedPassword = await hashPassword(password, 12);
+  const hashedPassword = await hashPassword(
+    password,
+    config.bcrypt_salt_rounds as string
+  );
   // console.log("pass", hashedPassword)
 
   const userData = {
