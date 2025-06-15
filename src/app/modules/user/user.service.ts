@@ -1,15 +1,15 @@
-import bcrypt from "bcrypt";
 import prisma, { TransactionClient } from "../../shared/prisma";
 import QueryBuilder from "../../shared/queryBuilder";
 import { Admin, UserRole } from "@prisma/client";
 import { userSearchableFields } from "./user.interface";
+import { hashPassword } from "../../shared/bcryptHelpers";
 
 const CreateAdminIntoDB = async (
   password: string,
   payload: Admin
 ): Promise<Admin> => {
   // console.log("admin", payload)
-  const hashedPassword = await bcrypt.hash(password, 12);
+  const hashedPassword = await hashPassword(password, 12);
   // console.log("pass", hashedPassword)
 
   const userData = {

@@ -6,13 +6,11 @@ import { verifyToken } from "../shared/jwtHelpers";
 import config from "../config";
 import prisma from "../shared/prisma";
 import { JwtPayload } from "jsonwebtoken";
+import { NextFunction, Request, Response } from "express";
 
 const auth = (...requiredRoles: UserRole[]) => {
-  //   console.log("role", ...requiredRoles);
-
-  return catchAsync(async (req, res, next) => {
+  return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization;
-    // console.log(token);
 
     if (!token) {
       throw new AppError(httpStatus.UNAUTHORIZED, "You are unauthorized");
@@ -51,14 +49,11 @@ const auth = (...requiredRoles: UserRole[]) => {
       decoded.iat &&
       user.passwordChangedAt.getTime() / 1000 > decoded.iat
     ) {
-      throw new AppError(httpStatus.UNAUTHORIZED, "You are not authorized !");
+      throw new AppError(httpStatus.UNAUTHORIZED, "You are unauthorized !");
     }
 
     if (requiredRoles && !requiredRoles.includes(decoded?.role)) {
-      throw new AppError(
-        httpStatus.UNAUTHORIZED,
-        "You are not authorized  hi!"
-      );
+      throw new AppError(httpStatus.UNAUTHORIZED, "You are unauthorized!");
     }
 
     req.user = decoded as JwtPayload & { role: string };

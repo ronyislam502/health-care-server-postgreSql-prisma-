@@ -8,6 +8,7 @@ import httpStatus from "http-status";
 import bcrypt from "bcrypt";
 import { SignOptions } from "jsonwebtoken";
 import { createToken, verifyToken } from "../../shared/jwtHelpers";
+import { comparePasswords } from "../../shared/bcryptHelpers";
 
 const loginUserFromDB = async (payload: TLoginUser) => {
   const user = await prisma.user.findUnique({
@@ -32,7 +33,7 @@ const loginUserFromDB = async (payload: TLoginUser) => {
     throw new AppError(httpStatus.FORBIDDEN, "This user is blocked ! !");
   }
 
-  const isCorrectPassword = await bcrypt.compare(
+  const isCorrectPassword = await comparePasswords(
     payload?.password,
     user?.password as string
   );
