@@ -16,6 +16,10 @@ const loginUserFromDB = async (payload: TLoginUser) => {
     },
   });
 
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "This user not found !");
+  }
+
   const isDeleted = user?.status;
 
   if (isDeleted === UserStatus.DELETED) {
@@ -67,7 +71,6 @@ const refreshTokenFromDB = async (token: string) => {
     config.jwt_refresh_token_secrete as string
   );
 
-  const { userEmail, iat } = decoded;
   const user = await prisma.user.findUniqueOrThrow({
     where: {
       email: decoded.email,

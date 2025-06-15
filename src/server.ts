@@ -1,18 +1,19 @@
-import express from "express";
 import { Server } from "http";
 import app from "./app";
-
-const port = 3000;
+import config from "./app/config";
+import prisma from "./app/shared/prisma";
 
 let server: Server;
 
 const main = async () => {
   try {
-    server = app.listen(port, () => {
-      console.log(`Health-Care listening on port ${port}`);
+    // await prisma.$connect();
+    server = app.listen(config?.port, () => {
+      console.log(`Health-Care listening on port ${config?.port}`);
     });
   } catch (error) {
     console.log(error);
+    // await prisma.$disconnect();
   }
 };
 
