@@ -104,7 +104,10 @@ const refreshTokenFromDB = async (token: string) => {
 
 const changePasswordIntoDB = async (
   userData: JwtPayload,
-  payload: { oldPassword: string; newPassword: string }
+  payload: {
+    oldPassword: string;
+    newPassword: string;
+  }
 ) => {
   const user = await prisma.user.findUniqueOrThrow({
     where: {
@@ -114,19 +117,17 @@ const changePasswordIntoDB = async (
   });
 
   const isCorrectPassword = await comparePasswords(
-    userData.password,
-    user.password as string
+    payload.oldPassword,
+    user?.password as string
   );
 
   if (!isCorrectPassword) {
     throw new AppError(httpStatus.FORBIDDEN, "Password do not matched");
   }
-
   const passwordHashed = await hashPassword(
     payload.newPassword,
-    config.bcrypt_salt_rounds as string
+    Number(config.bcrypt_salt_rounds)
   );
-
   await prisma.user.update({
     where: {
       email: userData.email,
@@ -138,12 +139,16 @@ const changePasswordIntoDB = async (
       passwordChangedAt: new Date(),
     },
   });
-
-  return null;
+  return {
+    message: "Password changed successfully!",
+  };
 };
+
+const forgotPasswordFromDB = async () => {};
 
 export const AuthServices = {
   loginUserFromDB,
   refreshTokenFromDB,
   changePasswordIntoDB,
+  forgotPasswordFromDB,
 };

@@ -12,7 +12,7 @@ const CreateAdminIntoDB = async (
   // console.log("admin", payload)
   const hashedPassword = await hashPassword(
     password,
-    config.bcrypt_salt_rounds as string
+    Number(config.bcrypt_salt_rounds)
   );
   // console.log("pass", hashedPassword)
 

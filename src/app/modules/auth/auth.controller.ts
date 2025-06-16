@@ -1,8 +1,10 @@
+import { JwtPayload } from "jsonwebtoken";
 import config from "../../config";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { AuthServices } from "./auth.service";
 import httpStatus from "http-status";
+import { Request } from "express";
 
 const loginUser = catchAsync(async (req, res) => {
   const result = await AuthServices.loginUserFromDB(req.body);
@@ -39,9 +41,7 @@ const refreshToken = catchAsync(async (req, res) => {
 });
 
 const changePassword = catchAsync(async (req, res) => {
-  const { user } = req.user;
-  const { ...passwordData } = req.body;
-  const result = await AuthServices.changePasswordIntoDB(user, passwordData);
+  const result = await AuthServices.changePasswordIntoDB(req.user, req.body);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -51,8 +51,20 @@ const changePassword = catchAsync(async (req, res) => {
   });
 });
 
+const forgotPassword = catchAsync(async (req, res) => {
+  const result = await AuthServices.forgotPasswordFromDB();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Forgot password",
+    data: result,
+  });
+});
+
 export const AuthControllers = {
   loginUser,
   refreshToken,
   changePassword,
+  forgotPassword,
 };
