@@ -23,6 +23,7 @@ const CreateAdminIntoDB = async (
   // console.log("pass", hashedPassword)
 
   const userData = {
+    name: payload.name,
     email: payload.email,
     password: hashedPassword,
     role: UserRole?.ADMIN,

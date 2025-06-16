@@ -51,56 +51,23 @@ const updateAdminIntoDB = async (
   return updatedAdmin;
 };
 
-// const deleteAdminFromDB = async (id: string): Promise<Admin | null> => {
-//   await prisma.admin.findUniqueOrThrow({
-//     where: {
-//       id,
-//     },
-//   });
-
-//   const result = await prisma.$transaction(async (transactionClient) => {
-//     const adminDelete = await transactionClient.admin.delete({
-//       where: {
-//         id,
-//       },
-//     });
-
-//     await transactionClient.user.delete({
-//       where: {
-//         email: adminDelete?.email,
-//       },
-//     });
-
-//     return adminDelete;
-//   });
-
-//   return result;
-// };
-
 const deleteAdminFromDB = async (id: string): Promise<Admin | null> => {
   await prisma.admin.findUniqueOrThrow({
     where: {
       id,
-      isDeleted: false,
     },
   });
 
   const result = await prisma.$transaction(async (transactionClient) => {
-    const adminDelete = await transactionClient.admin.update({
+    const adminDelete = await transactionClient.admin.delete({
       where: {
         id,
       },
-      data: {
-        isDeleted: true,
-      },
     });
 
-    await transactionClient.user.update({
+    await transactionClient.user.delete({
       where: {
         email: adminDelete?.email,
-      },
-      data: {
-        status: UserStatus.DELETED,
       },
     });
 
@@ -109,6 +76,39 @@ const deleteAdminFromDB = async (id: string): Promise<Admin | null> => {
 
   return result;
 };
+
+// const deleteAdminFromDB = async (id: string): Promise<Admin | null> => {
+//   await prisma.admin.findUniqueOrThrow({
+//     where: {
+//       id,
+//       isDeleted: false,
+//     },
+//   });
+
+//   const result = await prisma.$transaction(async (transactionClient) => {
+//     const adminDelete = await transactionClient.admin.update({
+//       where: {
+//         id,
+//       },
+//       data: {
+//         isDeleted: true,
+//       },
+//     });
+
+//     await transactionClient.user.update({
+//       where: {
+//         email: adminDelete?.email,
+//       },
+//       data: {
+//         status: UserStatus.DELETED,
+//       },
+//     });
+
+//     return adminDelete;
+//   });
+
+//   return result;
+// };
 
 export const AdminServices = {
   getAllAdminsFromDB,

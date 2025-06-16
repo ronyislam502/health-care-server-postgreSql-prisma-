@@ -20,7 +20,7 @@ router.post(
 
 router.post(
   "/forgot-password",
-  auth(UserRole.ADMIN),
+  // auth(UserRole.ADMIN),
   AuthControllers.forgotPassword
 );
 

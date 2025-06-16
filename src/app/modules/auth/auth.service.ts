@@ -7,6 +7,7 @@ import httpStatus from "http-status";
 import { JwtPayload, SignOptions } from "jsonwebtoken";
 import { createToken, verifyToken } from "../../shared/jwtHelpers";
 import { comparePasswords, hashPassword } from "../../shared/bcryptHelpers";
+import sendEmail from "../../shared/sendEmail";
 
 const loginUserFromDB = async (payload: TLoginUser) => {
   const user = await prisma.user.findUnique({
@@ -144,7 +145,50 @@ const changePasswordIntoDB = async (
   };
 };
 
-const forgotPasswordFromDB = async () => {};
+const forgotPasswordFromDB = async (userEmail: string) => {
+  const user = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: userEmail,
+      status: UserStatus.ACTIVE,
+    },
+  });
+
+  console.log("user", user);
+
+  const jwtPayload = {
+    email: user.email,
+    role: user.role,
+  };
+
+  const resetPassToken = createToken(
+    jwtPayload,
+    config.reset_pass_token as string,
+    config.reset_pass_token_expire_in as SignOptions["expiresIn"]
+  );
+
+  const resetPassLink = `${config.reset_pass_link}?email=${user?.email}&token=${resetPassToken} `;
+
+  console.log(resetPassLink);
+
+  const emailHtml = `
+  <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+    <div style="max-width: 600px; margin: auto; background-color: #fff; border-radius: 8px; padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+      <h2 style="color: #1e40af;">Reset Your Password</h2>
+      <p>Dear ${user?.name},</p>
+      <p>We received a request to reset your password. Click the button below to proceed:</p>
+      <p style="text-align: center;">
+        <a href="${resetPassLink}" style="display: inline-block; background-color: #1e40af; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+          Reset Password
+        </a>
+      </p>
+      <p>If you didn’t request this, you can safely ignore this email.</p>
+      <p>Thanks,<br/>The Support Team</p>
+    </div>
+  </div>
+`;
+
+  await sendEmail(user.email, emailHtml);
+};
 
 export const AuthServices = {
   loginUserFromDB,

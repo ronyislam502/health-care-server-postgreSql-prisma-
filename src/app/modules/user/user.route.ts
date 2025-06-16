@@ -17,7 +17,7 @@ router.post(
   UserControllers.CreateAdmin
 );
 
-router.get("/", auth(UserRole?.ADMIN), UserControllers.getAllUsers);
+router.get("/", UserControllers.getAllUsers);
 
 router.get("/:id", UserControllers.getSingleUser);
 
