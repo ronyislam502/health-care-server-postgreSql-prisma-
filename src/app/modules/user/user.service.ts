@@ -4,12 +4,18 @@ import { Admin, UserRole } from "@prisma/client";
 import { userSearchableFields } from "./user.interface";
 import { hashPassword } from "../../shared/bcryptHelpers";
 import config from "../../config";
+import { TImageFile } from "../../interface/image.interface";
 
 const CreateAdminIntoDB = async (
+  image: TImageFile,
   password: string,
   payload: Admin
 ): Promise<Admin> => {
   // console.log("admin", payload)
+
+  const file = image;
+  payload.avatar = file?.path;
+
   const hashedPassword = await hashPassword(
     password,
     Number(config.bcrypt_salt_rounds)
