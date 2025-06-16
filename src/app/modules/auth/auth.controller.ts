@@ -5,6 +5,7 @@ import sendResponse from "../../shared/sendResponse";
 import { AuthServices } from "./auth.service";
 import httpStatus from "http-status";
 import { Request } from "express";
+import AppError from "../../errors/AppError";
 
 const loginUser = catchAsync(async (req, res) => {
   const result = await AuthServices.loginUserFromDB(req.body);
@@ -58,7 +59,23 @@ const forgotPassword = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Forgot password",
+    message: "Please, Check your email!",
+    data: result,
+  });
+});
+
+const resetPassword = catchAsync(async (req, res) => {
+  const token = req.headers.authorization;
+
+  if (!token) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Something went wrong !");
+  }
+  const result = await AuthServices.resetPasswordIntoDB(req.body, token);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Password reset successfully!",
     data: result,
   });
 });
@@ -68,4 +85,5 @@ export const AuthControllers = {
   refreshToken,
   changePassword,
   forgotPassword,
+  resetPassword,
 };

@@ -129,10 +129,13 @@ const changePasswordIntoDB = async (
     payload.newPassword,
     Number(config.bcrypt_salt_rounds)
   );
+
+  // console.log("has", passwordHashed);
+
   await prisma.user.update({
     where: {
-      email: userData.email,
-      role: userData.role,
+      email: user.email,
+      role: user.role,
     },
     data: {
       password: passwordHashed,
@@ -153,7 +156,7 @@ const forgotPasswordFromDB = async (userEmail: string) => {
     },
   });
 
-  console.log("user", user);
+  // console.log("user", user);
 
   const jwtPayload = {
     email: user.email,
@@ -162,13 +165,13 @@ const forgotPasswordFromDB = async (userEmail: string) => {
 
   const resetPassToken = createToken(
     jwtPayload,
-    config.reset_pass_token as string,
+    config.jwt_access_Token_secrete as string,
     config.reset_pass_token_expire_in as SignOptions["expiresIn"]
   );
 
-  const resetPassLink = `${config.reset_pass_link}?email=${user?.email}&token=${resetPassToken} `;
+  const resetPassLink = `${config?.reset_pass_link}?email=${user?.email}&token=${resetPassToken} `;
 
-  console.log(resetPassLink);
+  console.log("reset", resetPassLink);
 
   const emailHtml = `
   <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
@@ -190,9 +193,48 @@ const forgotPasswordFromDB = async (userEmail: string) => {
   await sendEmail(user.email, emailHtml);
 };
 
+const resetPasswordIntoDB = async (
+  payload: { email: string; newPassword: string },
+  token: string
+) => {
+  const user = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: payload.email,
+      status: UserStatus.ACTIVE,
+    },
+  });
+
+  const isTokenValid = verifyToken(
+    token,
+    config.reset_pass_token_secret as string
+  );
+
+  if (!isTokenValid) {
+    throw new AppError(httpStatus.FORBIDDEN, "Forbidden!");
+  }
+
+  const passwordHashed = await hashPassword(
+    payload?.newPassword,
+    Number(config?.bcrypt_salt_rounds)
+  );
+
+  await prisma.user.update({
+    where: {
+      email: user.email,
+      role: user.role,
+    },
+    data: {
+      password: passwordHashed,
+      needPasswordChange: false,
+      passwordChangedAt: new Date(),
+    },
+  });
+};
+
 export const AuthServices = {
   loginUserFromDB,
   refreshTokenFromDB,
   changePasswordIntoDB,
   forgotPasswordFromDB,
+  resetPasswordIntoDB,
 };
