@@ -1,6 +1,6 @@
 import prisma, { TransactionClient } from "../../shared/prisma";
 import QueryBuilder from "../../shared/queryBuilder";
-import { Admin, UserRole } from "@prisma/client";
+import { Admin, UserRole, UserStatus } from "@prisma/client";
 import { userSearchableFields } from "./user.interface";
 import { hashPassword } from "../../shared/bcryptHelpers";
 import config from "../../config";
@@ -13,8 +13,13 @@ const CreateAdminIntoDB = async (
 ): Promise<Admin> => {
   // console.log("admin", payload)
 
-  const file = image;
-  payload.avatar = file?.path;
+  console.log("image", image);
+
+  // const file = image;
+  // payload.avatar = file?.path;
+  if (image && image.path) {
+    payload.avatar = image.path;
+  }
 
   const hashedPassword = await hashPassword(
     password,
@@ -69,8 +74,29 @@ const getSingleUserFromDB = async (id: string) => {
   return result;
 };
 
+const getMyProfileFromDB = async (email: string) => {
+  const userinfo = await prisma.user.findUniqueOrThrow({
+    where: {
+      email,
+      status: UserStatus.ACTIVE,
+    },
+  });
+
+  let profileInfo;
+  if (userinfo.role === UserRole.ADMIN) {
+    profileInfo = await prisma.admin.findUnique({
+      where: {
+        email: userinfo.email,
+      },
+    });
+  }
+
+  return { ...userinfo, ...profileInfo };
+};
+
 export const UserServices = {
   CreateAdminIntoDB,
   getAllUsersFromDB,
   getSingleUserFromDB,
+  getMyProfileFromDB,
 };

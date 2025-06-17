@@ -45,8 +45,21 @@ const getSingleUser = catchAsync(async (req, res) => {
   });
 });
 
+const getMyProfile = catchAsync(async (req, res) => {
+  const { email } = req.params;
+  const result = await UserServices.getMyProfileFromDB(email);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "My Profile retrieved successfully",
+    data: result,
+  });
+});
+
 export const UserControllers = {
   CreateAdmin,
   getAllUsers,
   getSingleUser,
+  getMyProfile,
 };

@@ -11,6 +11,7 @@ const router = Router();
 
 router.post(
   "/create-admin",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
   multerUpload.single("image"),
   parseBody,
   validateRequest(AdminValidations.createAdminValidationSchema),
@@ -20,5 +21,7 @@ router.post(
 router.get("/", UserControllers.getAllUsers);
 
 router.get("/:id", UserControllers.getSingleUser);
+
+router.get("/:email", UserControllers.getMyProfile);
 
 export const UserRoutes = router;
