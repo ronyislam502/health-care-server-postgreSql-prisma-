@@ -74,6 +74,23 @@ const getSingleUserFromDB = async (id: string) => {
   return result;
 };
 
+const changeProfileStatusFromDB = async (id: string, status: UserRole) => {
+  const user = await prisma.user.findUniqueOrThrow({
+    where: {
+      id,
+    },
+  });
+
+  const updateStatus = await prisma.user.update({
+    where: {
+      id,
+    },
+    data: status,
+  });
+
+  return updateStatus;
+};
+
 const getMyProfileFromDB = async (email: string) => {
   const userinfo = await prisma.user.findUniqueOrThrow({
     where: {
@@ -98,5 +115,6 @@ export const UserServices = {
   CreateAdminIntoDB,
   getAllUsersFromDB,
   getSingleUserFromDB,
+  changeProfileStatusFromDB,
   getMyProfileFromDB,
 };

@@ -22,6 +22,8 @@ router.get("/", UserControllers.getAllUsers);
 
 router.get("/:id", UserControllers.getSingleUser);
 
+router.patch("/:id/status", UserControllers.changeProfileStatus);
+
 router.get("/:email", UserControllers.getMyProfile);
 
 export const UserRoutes = router;

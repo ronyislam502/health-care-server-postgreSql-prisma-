@@ -45,6 +45,18 @@ const getSingleUser = catchAsync(async (req, res) => {
   });
 });
 
+const changeProfileStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await UserServices.changeProfileStatusFromDB(id, req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User profile status changed successfully",
+    data: result,
+  });
+});
+
 const getMyProfile = catchAsync(async (req, res) => {
   const { email } = req.params;
   const result = await UserServices.getMyProfileFromDB(email);
@@ -61,5 +73,6 @@ export const UserControllers = {
   CreateAdmin,
   getAllUsers,
   getSingleUser,
+  changeProfileStatus
   getMyProfile,
 };
