@@ -73,6 +73,6 @@ export const UserControllers = {
   CreateAdmin,
   getAllUsers,
   getSingleUser,
-  changeProfileStatus
+  changeProfileStatus,
   getMyProfile,
 };
