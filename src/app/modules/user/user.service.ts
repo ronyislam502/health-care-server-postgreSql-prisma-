@@ -263,6 +263,56 @@ const getMyProfileFromDB = async (userData: JwtPayload) => {
   return { ...userInfo, ...profileInfo };
 };
 
+const updateMyProfileIntoDB = async (
+  userData: JwtPayload,
+  image: TImageFile,
+  payload: Partial<Admin | Doctor | Patient>
+) => {
+  const isUser = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: userData.email,
+      status: UserStatus.ACTIVE,
+    },
+  });
+
+  const file = image;
+  if (file) {
+    payload.avatar = file.path;
+  }
+
+  let profileInfo;
+
+  if (isUser.role === UserRole.SUPER_ADMIN) {
+    profileInfo = await prisma.admin.update({
+      where: {
+        email: isUser.email,
+      },
+      data: payload,
+    });
+  } else if (isUser.role === UserRole.ADMIN) {
+    profileInfo = await prisma.admin.update({
+      where: {
+        email: isUser.email,
+      },
+      data: payload,
+    });
+  } else if (isUser.role === UserRole.DOCTOR) {
+    profileInfo = await prisma.doctor.update({
+      where: {
+        email: isUser.email,
+      },
+      data: payload,
+    });
+  } else if (isUser.role === UserRole.PATIENT) {
+    profileInfo = await prisma.patient.update({
+      where: {
+        email: isUser.email,
+      },
+      data: payload,
+    });
+  }
+};
+
 export const UserServices = {
   CreateAdminIntoDB,
   CreateDoctorIntoDB,
@@ -271,4 +321,5 @@ export const UserServices = {
   getSingleUserFromDB,
   changeProfileStatusFromDB,
   getMyProfileFromDB,
+  updateMyProfileIntoDB,
 };

@@ -50,4 +50,12 @@ router.get("/:email", UserControllers.getSingleUser);
 
 router.patch("/:id/status", UserControllers.changeProfileStatus);
 
+router.patch(
+  "/update-my-profile",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
+  multerUpload.single("image"),
+  parseBody,
+  UserControllers.updateMyProfile
+);
+
 export const UserRoutes = router;

@@ -5,6 +5,7 @@ import sendResponse from "../../shared/sendResponse";
 import { UserServices } from "./user.service";
 import httpStatus from "http-status";
 import { TLoginUser } from "../auth/auth.interface";
+import { JwtPayload } from "jsonwebtoken";
 
 const CreateAdmin = catchAsync(async (req, res) => {
   const { password, admin } = req.body;
@@ -104,6 +105,21 @@ const getMyProfile = catchAsync(async (req, res) => {
   });
 });
 
+const updateMyProfile = catchAsync(async (req, res) => {
+  const result = await UserServices.updateMyProfileIntoDB(
+    req.user as JwtPayload,
+    req.file as TImageFile,
+    req.body
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "My Profile update successfully",
+    data: result,
+  });
+});
+
 export const UserControllers = {
   CreateAdmin,
   CreateDoctor,
@@ -112,4 +128,5 @@ export const UserControllers = {
   getSingleUser,
   changeProfileStatus,
   getMyProfile,
+  updateMyProfile,
 };
