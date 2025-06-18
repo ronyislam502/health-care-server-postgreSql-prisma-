@@ -1,8 +1,10 @@
+import { User } from "@prisma/client";
 import { TImageFile } from "../../interface/image.interface";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { UserServices } from "./user.service";
 import httpStatus from "http-status";
+import { TLoginUser } from "../auth/auth.interface";
 
 const CreateAdmin = catchAsync(async (req, res) => {
   const { password, admin } = req.body;
@@ -36,6 +38,22 @@ const CreateDoctor = catchAsync(async (req, res) => {
   });
 });
 
+const CreatePatient = catchAsync(async (req, res) => {
+  const { password, patient } = req.body;
+  const result = await UserServices.CreatePatientIntoDB(
+    req.file as TImageFile,
+    password,
+    patient
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Patient Created Successfully",
+    data: result,
+  });
+});
+
 const getAllUsers = catchAsync(async (req, res) => {
   const query = { ...req.query };
   const result = await UserServices.getAllUsersFromDB(query);
@@ -50,8 +68,8 @@ const getAllUsers = catchAsync(async (req, res) => {
 });
 
 const getSingleUser = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result = await UserServices.getSingleUserFromDB(id);
+  const { email } = req.params;
+  const result = await UserServices.getSingleUserFromDB(email);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -74,8 +92,9 @@ const changeProfileStatus = catchAsync(async (req, res) => {
 });
 
 const getMyProfile = catchAsync(async (req, res) => {
-  const { email } = req.params;
-  const result = await UserServices.getMyProfileFromDB(email);
+  console.log("user", req.user);
+  const user = req.user;
+  const result = await UserServices.getMyProfileFromDB(user);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -88,6 +107,7 @@ const getMyProfile = catchAsync(async (req, res) => {
 export const UserControllers = {
   CreateAdmin,
   CreateDoctor,
+  CreatePatient,
   getAllUsers,
   getSingleUser,
   changeProfileStatus,

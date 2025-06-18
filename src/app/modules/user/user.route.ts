@@ -7,12 +7,13 @@ import { UserRole } from "@prisma/client";
 import { multerUpload } from "../../config/multer.config";
 import { parseBody } from "../../middlewares/bodyParser";
 import { DoctorValidations } from "../doctor/doctor.validation";
+import { PatientValidations } from "../patient/patient.validation";
 
 const router = Router();
 
 router.post(
   "/create-admin",
-  // auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
   multerUpload.single("image"),
   parseBody,
   validateRequest(AdminValidations.createAdminValidationSchema),
@@ -28,16 +29,25 @@ router.post(
   UserControllers.CreateDoctor
 );
 
+router.post(
+  "/create-patient",
+  // auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+  multerUpload.single("image"),
+  parseBody,
+  validateRequest(PatientValidations.createPatientValidationSchema),
+  UserControllers.CreatePatient
+);
+
 router.get("/", UserControllers.getAllUsers);
 
-router.get("/:id", UserControllers.getSingleUser);
-
-router.patch("/:id/status", UserControllers.changeProfileStatus);
-
 router.get(
-  "/:email",
-  auth(UserRole.ADMIN, UserRole.DOCTOR),
+  "/my-profile",
+  auth(UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT, UserRole.SUPER_ADMIN),
   UserControllers.getMyProfile
 );
+
+router.get("/:email", UserControllers.getSingleUser);
+
+router.patch("/:id/status", UserControllers.changeProfileStatus);
 
 export const UserRoutes = router;

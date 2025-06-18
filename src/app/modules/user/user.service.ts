@@ -5,6 +5,7 @@ import { userSearchableFields } from "./user.interface";
 import { hashPassword } from "../../shared/bcryptHelpers";
 import config from "../../config";
 import { TImageFile } from "../../interface/image.interface";
+import { JwtPayload } from "jsonwebtoken";
 
 const CreateAdminIntoDB = async (
   image: TImageFile,
@@ -92,10 +93,6 @@ const CreatePatientIntoDB = async (
   password: string,
   payload: Patient
 ): Promise<Patient> => {
-  // console.log("doctor", payload);
-
-  // console.log("image", image);
-
   const file = image;
 
   if (file) {
@@ -120,11 +117,11 @@ const CreatePatientIntoDB = async (
       await transactionClient.user.create({
         data: userData,
       });
-      const createDoctor = await transactionClient.patient.create({
+      const createPatient = await transactionClient.patient.create({
         data: payload,
       });
 
-      return createDoctor;
+      return createPatient;
     }
   );
 
@@ -148,7 +145,7 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
       updatedAt: true,
       admin: true,
       doctor: true,
-      // patient: true,
+      patient: true,
     });
 
   const users = await queryBuilder.execute();
@@ -158,13 +155,49 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
 };
 
 const getSingleUserFromDB = async (email: string) => {
-  const result = await prisma.user.findUniqueOrThrow({
+  const isUser = await prisma.user.findUniqueOrThrow({
     where: {
       email,
+      status: UserStatus.ACTIVE,
+    },
+    select: {
+      id: true,
+      email: true,
+      needPasswordChange: true,
+      role: true,
+      status: true,
     },
   });
 
-  return result;
+  let profileInfo;
+
+  if (isUser.role === UserRole.SUPER_ADMIN) {
+    profileInfo = await prisma.admin.findUnique({
+      where: {
+        email: isUser.email,
+      },
+    });
+  } else if (isUser.role === UserRole.ADMIN) {
+    profileInfo = await prisma.admin.findUnique({
+      where: {
+        email: isUser.email,
+      },
+    });
+  } else if (isUser.role === UserRole.DOCTOR) {
+    profileInfo = await prisma.doctor.findUnique({
+      where: {
+        email: isUser.email,
+      },
+    });
+  } else if (isUser.role === UserRole.PATIENT) {
+    profileInfo = await prisma.patient.findUnique({
+      where: {
+        email: isUser.email,
+      },
+    });
+  }
+
+  return { ...isUser, ...profileInfo };
 };
 
 const changeProfileStatusFromDB = async (id: string, status: UserRole) => {
@@ -184,24 +217,50 @@ const changeProfileStatusFromDB = async (id: string, status: UserRole) => {
   return updateStatus;
 };
 
-const getMyProfileFromDB = async (userEmail: string) => {
-  const userinfo = await prisma.user.findUniqueOrThrow({
+const getMyProfileFromDB = async (userData: JwtPayload) => {
+  const userInfo = await prisma.user.findUniqueOrThrow({
     where: {
-      email: userEmail,
+      email: userData.email,
       status: UserStatus.ACTIVE,
+    },
+    select: {
+      id: true,
+      email: true,
+      needPasswordChange: true,
+      role: true,
+      status: true,
     },
   });
 
   let profileInfo;
-  if (userinfo.role === UserRole.ADMIN) {
+
+  if (userInfo.role === UserRole.SUPER_ADMIN) {
     profileInfo = await prisma.admin.findUnique({
       where: {
-        email: userinfo.email,
+        email: userInfo.email,
+      },
+    });
+  } else if (userInfo.role === UserRole.ADMIN) {
+    profileInfo = await prisma.admin.findUnique({
+      where: {
+        email: userInfo.email,
+      },
+    });
+  } else if (userInfo.role === UserRole.DOCTOR) {
+    profileInfo = await prisma.doctor.findUnique({
+      where: {
+        email: userInfo.email,
+      },
+    });
+  } else if (userInfo.role === UserRole.PATIENT) {
+    profileInfo = await prisma.patient.findUnique({
+      where: {
+        email: userInfo.email,
       },
     });
   }
 
-  return { ...userinfo, ...profileInfo };
+  return { ...userInfo, ...profileInfo };
 };
 
 export const UserServices = {

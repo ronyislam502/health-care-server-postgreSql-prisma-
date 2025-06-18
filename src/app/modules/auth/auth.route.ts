@@ -13,14 +13,14 @@ router.post("/refresh-token", AuthControllers.refreshToken);
 
 router.post(
   "/change-password",
-  auth(UserRole.ADMIN),
+  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
   validateRequest(AuthValidations.changePasswordValidationSchema),
   AuthControllers.changePassword
 );
 
 router.post(
   "/forgot-password",
-  // auth(UserRole.ADMIN),
+  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
   AuthControllers.forgotPassword
 );
 
