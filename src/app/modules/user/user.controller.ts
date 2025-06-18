@@ -20,6 +20,24 @@ const CreateAdmin = catchAsync(async (req, res) => {
   });
 });
 
+const CreateDoctor = catchAsync(async (req, res) => {
+  const { password, doctor } = req.body;
+  const result = await UserServices.CreateDoctorIntoDB(
+    req.file as TImageFile,
+    password,
+    doctor
+  );
+
+  console.log("result", result);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Doctor Created Successfully",
+    data: result,
+  });
+});
+
 const getAllUsers = catchAsync(async (req, res) => {
   const query = { ...req.query };
   const result = await UserServices.getAllUsersFromDB(query);
@@ -71,6 +89,7 @@ const getMyProfile = catchAsync(async (req, res) => {
 
 export const UserControllers = {
   CreateAdmin,
+  CreateDoctor,
   getAllUsers,
   getSingleUser,
   changeProfileStatus,

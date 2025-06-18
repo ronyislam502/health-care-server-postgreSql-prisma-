@@ -1,6 +1,6 @@
 import prisma, { TransactionClient } from "../../shared/prisma";
 import QueryBuilder from "../../shared/queryBuilder";
-import { Admin, UserRole, UserStatus } from "@prisma/client";
+import { Admin, Doctor, UserRole, UserStatus } from "@prisma/client";
 import { userSearchableFields } from "./user.interface";
 import { hashPassword } from "../../shared/bcryptHelpers";
 import config from "../../config";
@@ -11,12 +11,6 @@ const CreateAdminIntoDB = async (
   password: string,
   payload: Admin
 ): Promise<Admin> => {
-  // console.log("admin", payload)
-
-  console.log("image", image);
-
-  // const file = image;
-  // payload.avatar = file?.path;
   if (image && image.path) {
     payload.avatar = image.path;
   }
@@ -50,13 +44,71 @@ const CreateAdminIntoDB = async (
   return result;
 };
 
+const CreateDoctorIntoDB = async (
+  image: TImageFile,
+  password: string,
+  payload: Doctor
+): Promise<Doctor> => {
+  // console.log("doctor", payload);
+
+  // console.log("image", image);
+
+  const file = image;
+
+  if (file) {
+    payload.avatar = image.path;
+  }
+
+  const hashedPassword = await hashPassword(
+    password,
+    Number(config.bcrypt_salt_rounds)
+  );
+  // console.log("pass", hashedPassword)
+
+  const userData = {
+    name: payload.name,
+    email: payload.email,
+    password: hashedPassword,
+    role: UserRole?.DOCTOR,
+  };
+
+  const result = await prisma.$transaction(
+    async (transactionClient: TransactionClient) => {
+      await transactionClient.user.create({
+        data: userData,
+      });
+      const createDoctor = await transactionClient.doctor.create({
+        data: payload,
+      });
+
+      return createDoctor;
+    }
+  );
+
+  console.log(result);
+
+  return result;
+};
+
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {
   const queryBuilder = new QueryBuilder(prisma.user, query)
     .search(userSearchableFields)
     .filter()
     .sort()
     .paginate()
-    .fields();
+    .fields()
+    .setSelect({
+      id: true,
+      email: true,
+      role: true,
+      needPasswordChange: true,
+      status: true,
+      createdAt: true,
+      updatedAt: true,
+      admin: true,
+      doctor: true,
+      // patient: true,
+    });
 
   const users = await queryBuilder.execute();
   const meta = await queryBuilder.countTotal();
@@ -64,10 +116,10 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
   return { meta, data: users };
 };
 
-const getSingleUserFromDB = async (id: string) => {
+const getSingleUserFromDB = async (email: string) => {
   const result = await prisma.user.findUniqueOrThrow({
     where: {
-      id,
+      email,
     },
   });
 
@@ -83,7 +135,7 @@ const changeProfileStatusFromDB = async (id: string, status: UserRole) => {
 
   const updateStatus = await prisma.user.update({
     where: {
-      id,
+      id: user?.id,
     },
     data: status,
   });
@@ -91,10 +143,10 @@ const changeProfileStatusFromDB = async (id: string, status: UserRole) => {
   return updateStatus;
 };
 
-const getMyProfileFromDB = async (email: string) => {
+const getMyProfileFromDB = async (userEmail: string) => {
   const userinfo = await prisma.user.findUniqueOrThrow({
     where: {
-      email,
+      email: userEmail,
       status: UserStatus.ACTIVE,
     },
   });
@@ -113,6 +165,7 @@ const getMyProfileFromDB = async (email: string) => {
 
 export const UserServices = {
   CreateAdminIntoDB,
+  CreateDoctorIntoDB,
   getAllUsersFromDB,
   getSingleUserFromDB,
   changeProfileStatusFromDB,

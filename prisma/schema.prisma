@@ -66,22 +66,22 @@ model User {
   @@map("users")
 }
 
-  model Admin {
-    id                String    @id @default(uuid())
-    name              String
-    email             String    @unique
-    avatar            String?
-    phone             String
-    isDeleted         Boolean   @default(false)
-    createdAt         DateTime  @default(now())
-    updatedAt         DateTime  @updatedAt
+model Admin {
+  id                String    @id @default(uuid())
+  name              String
+  email             String    @unique
+  avatar            String?
+  phone             String
+  isDeleted         Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
-    user User @relation(fields: [email], references: [email])
+  user              User      @relation(fields: [email], references: [email])
 
-    @@map("admins")
+  @@map("admins")
   }
 
- model Doctor {
+model Doctor {
   id                    String   @id @default(uuid())
   name                  String
   email                 String   @unique
@@ -101,10 +101,10 @@ model User {
   user                  User      @relation(fields: [email], references: [email])
 
   @@map("doctors")
- } 
+} 
 
 
- model Patient {
+model Patient {
   id            String   @id @unique @default(uuid())
   email         String   @unique
   name          String
@@ -117,4 +117,4 @@ model User {
   user          User     @relation(fields: [email],references: [email])
 
   @@map("patients")
- }
+}

@@ -132,6 +132,11 @@ class QueryBuilder<T> {
     };
   }
 
+  setSelect(fields: Record<string, boolean>) {
+    this.select = fields;
+    return this;
+  }
+
   // Final execution method returning Prisma results
   async execute() {
     return this.modelQuery.findMany({
