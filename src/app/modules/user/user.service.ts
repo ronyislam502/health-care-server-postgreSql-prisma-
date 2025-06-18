@@ -1,6 +1,6 @@
 import prisma, { TransactionClient } from "../../shared/prisma";
 import QueryBuilder from "../../shared/queryBuilder";
-import { Admin, Doctor, UserRole, UserStatus } from "@prisma/client";
+import { Admin, Doctor, Patient, UserRole, UserStatus } from "@prisma/client";
 import { userSearchableFields } from "./user.interface";
 import { hashPassword } from "../../shared/bcryptHelpers";
 import config from "../../config";
@@ -54,9 +54,8 @@ const CreateDoctorIntoDB = async (
   // console.log("image", image);
 
   const file = image;
-
   if (file) {
-    payload.avatar = image.path;
+    payload.avatar = file.path;
   }
 
   const hashedPassword = await hashPassword(
@@ -85,7 +84,49 @@ const CreateDoctorIntoDB = async (
     }
   );
 
-  console.log(result);
+  return result;
+};
+
+const CreatePatientIntoDB = async (
+  image: TImageFile,
+  password: string,
+  payload: Patient
+): Promise<Patient> => {
+  // console.log("doctor", payload);
+
+  // console.log("image", image);
+
+  const file = image;
+
+  if (file) {
+    payload.avatar = image.path;
+  }
+
+  const hashedPassword = await hashPassword(
+    password,
+    Number(config.bcrypt_salt_rounds)
+  );
+  // console.log("pass", hashedPassword)
+
+  const userData = {
+    name: payload.name,
+    email: payload.email,
+    password: hashedPassword,
+    role: UserRole?.PATIENT,
+  };
+
+  const result = await prisma.$transaction(
+    async (transactionClient: TransactionClient) => {
+      await transactionClient.user.create({
+        data: userData,
+      });
+      const createDoctor = await transactionClient.patient.create({
+        data: payload,
+      });
+
+      return createDoctor;
+    }
+  );
 
   return result;
 };
@@ -166,6 +207,7 @@ const getMyProfileFromDB = async (userEmail: string) => {
 export const UserServices = {
   CreateAdminIntoDB,
   CreateDoctorIntoDB,
+  CreatePatientIntoDB,
   getAllUsersFromDB,
   getSingleUserFromDB,
   changeProfileStatusFromDB,

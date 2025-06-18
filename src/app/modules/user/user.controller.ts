@@ -28,8 +28,6 @@ const CreateDoctor = catchAsync(async (req, res) => {
     doctor
   );
 
-  console.log("result", result);
-
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
