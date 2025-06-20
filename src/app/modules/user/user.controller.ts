@@ -8,6 +8,7 @@ import { TLoginUser } from "../auth/auth.interface";
 import { JwtPayload } from "jsonwebtoken";
 
 const CreateAdmin = catchAsync(async (req, res) => {
+  console.log("file", req.file);
   const { password, admin } = req.body;
   const result = await UserServices.CreateAdminIntoDB(
     req.file as TImageFile,

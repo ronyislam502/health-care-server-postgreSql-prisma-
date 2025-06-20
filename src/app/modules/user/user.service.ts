@@ -1,11 +1,11 @@
-import prisma, { TransactionClient } from "../../shared/prisma";
 import QueryBuilder from "../../shared/queryBuilder";
-import { Admin, Doctor, Patient, UserRole, UserStatus } from "@prisma/client";
 import { hashPassword } from "../../shared/bcryptHelpers";
 import config from "../../config";
 import { TImageFile } from "../../interface/image.interface";
 import { JwtPayload } from "jsonwebtoken";
 import { userSearchableFields } from "./user.interface";
+import prisma, { TransactionClient } from "../../shared/prisma";
+import { Admin, Doctor, Patient, UserRole, UserStatus } from "@prisma/client";
 
 const CreateAdminIntoDB = async (
   image: TImageFile,
@@ -129,7 +129,6 @@ const CreatePatientIntoDB = async (
 };
 
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {
-  console.log("query", query);
   const queryBuilder = new QueryBuilder(prisma.user, query)
     .search(userSearchableFields)
     .filter()

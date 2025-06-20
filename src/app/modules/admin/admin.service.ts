@@ -1,8 +1,8 @@
-import { Admin, UserStatus } from "@prisma/client";
 import prisma from "../../shared/prisma";
 import QueryBuilder from "../../shared/queryBuilder";
 import { adminSearchableFields } from "./admin.interface";
 import { TMeta } from "../../shared/sendResponse";
+import { Admin, UserStatus } from "@prisma/client";
 
 const getAllAdminsFromDB = async (
   query: Record<string, unknown>

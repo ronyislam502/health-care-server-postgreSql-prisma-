@@ -13,7 +13,7 @@ const router = Router();
 
 router.post(
   "/create-admin",
-  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+  // auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
   multerUpload.single("image"),
   parseBody,
   validateRequest(AdminValidations.createAdminValidationSchema),
