@@ -1,11 +1,11 @@
 import prisma, { TransactionClient } from "../../shared/prisma";
 import QueryBuilder from "../../shared/queryBuilder";
 import { Admin, Doctor, Patient, UserRole, UserStatus } from "@prisma/client";
-import { userSearchableFields } from "./user.interface";
 import { hashPassword } from "../../shared/bcryptHelpers";
 import config from "../../config";
 import { TImageFile } from "../../interface/image.interface";
 import { JwtPayload } from "jsonwebtoken";
+import { userSearchableFields } from "./user.interface";
 
 const CreateAdminIntoDB = async (
   image: TImageFile,
@@ -129,6 +129,7 @@ const CreatePatientIntoDB = async (
 };
 
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {
+  console.log("query", query);
   const queryBuilder = new QueryBuilder(prisma.user, query)
     .search(userSearchableFields)
     .filter()
@@ -138,6 +139,7 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
     .setSelect({
       id: true,
       email: true,
+      name: true,
       role: true,
       needPasswordChange: true,
       status: true,
@@ -311,6 +313,8 @@ const updateMyProfileIntoDB = async (
       data: payload,
     });
   }
+
+  return { ...profileInfo };
 };
 
 export const UserServices = {

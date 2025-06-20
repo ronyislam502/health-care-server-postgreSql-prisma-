@@ -57,6 +57,7 @@ const CreatePatient = catchAsync(async (req, res) => {
 
 const getAllUsers = catchAsync(async (req, res) => {
   const query = { ...req.query };
+  console.log("qq", query);
   const result = await UserServices.getAllUsersFromDB(query);
 
   sendResponse(res, {

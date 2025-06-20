@@ -19,30 +19,49 @@ class QueryBuilder<T> {
 
   // Search by searchable fields with Prisma's 'contains' and insensitive mode
 
-  search(searchableFields: { field: string; isEnum: boolean }[]) {
+  search(searchableFields: string[]) {
     const searchTerm = this.query.searchTerm;
 
-    if (typeof searchTerm === "string" && searchableFields.length > 0) {
-      this.where.OR = searchableFields.map(({ field, isEnum }) => {
-        if (isEnum) {
-          return {
-            [field]: {
-              equals: searchTerm, // or searchTerm.toUpperCase() if needed
-            },
-          };
-        } else {
-          return {
-            [field]: {
-              contains: searchTerm,
-              mode: "insensitive",
-            },
-          };
-        }
-      });
+    if (typeof searchTerm !== "string" || searchableFields.length === 0) {
+      return this;
     }
+
+    this.where.OR = searchableFields.map((field) => {
+      return {
+        [field]: {
+          contains: searchTerm,
+          mode: "insensitive",
+        },
+      };
+    });
 
     return this;
   }
+
+  // search(searchableFields: { field: string; isEnum: boolean }[]) {
+  //   const searchTerm = this.query.searchTerm;
+
+  //   if (typeof searchTerm === "string" && searchableFields.length > 0) {
+  //     this.where.OR = searchableFields.map(({ field, isEnum }) => {
+  //       if (isEnum) {
+  //         return {
+  //           [field]: {
+  //             equals: searchTerm, // or searchTerm.toUpperCase() if needed
+  //           },
+  //         };
+  //       } else {
+  //         return {
+  //           [field]: {
+  //             contains: searchTerm,
+  //             mode: "insensitive",
+  //           },
+  //         };
+  //       }
+  //     });
+  //   }
+
+  //   return this;
+  // }
 
   // Filtering logic that supports operators like gte, lte, etc.
   filter() {
@@ -59,12 +78,28 @@ class QueryBuilder<T> {
       ) {
         this.where[key] = {};
         for (const operator in value) {
-          (this.where[key] as Record<string, unknown>)[operator] = (
-            value as Record<string, unknown>
-          )[operator];
+          const operatorValue = (value as Record<string, unknown>)[operator];
+
+          if (
+            typeof operatorValue === "string" &&
+            !isNaN(Number(operatorValue))
+          ) {
+            (this.where[key] as Record<string, any>)[operator] =
+              Number(operatorValue);
+          } else if (typeof operatorValue === "number") {
+            (this.where[key] as Record<string, any>)[operator] = operatorValue;
+          } else {
+            (this.where[key] as Record<string, any>)[operator] = operatorValue;
+          }
         }
       } else {
-        this.where[key] = { equals: value };
+        if (typeof value === "string" && !isNaN(Number(value))) {
+          this.where[key] = { equals: Number(value) };
+        } else if (typeof value === "number") {
+          this.where[key] = { equals: value };
+        } else {
+          this.where[key] = { equals: value };
+        }
       }
     }
 
