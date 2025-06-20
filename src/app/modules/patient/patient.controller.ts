@@ -1,6 +1,7 @@
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { PatientServices } from "./patient.service";
+import httpStatus from "http-status";
 
 const getAllPatients = catchAsync(async (req, res) => {
   const result = await PatientServices.getAllPatientsFromDB(req.query);
