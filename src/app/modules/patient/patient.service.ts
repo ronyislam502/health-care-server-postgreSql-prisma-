@@ -49,7 +49,7 @@ const deletePatientFromDB = async (id: string): Promise<Patient | null> => {
       },
     });
 
-    await transactionClient.patient.update({
+    await transactionClient.user.update({
       where: {
         email: patientDelete?.email,
       },
