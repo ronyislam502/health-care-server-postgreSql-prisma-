@@ -14,6 +14,19 @@ const getAllPatients = catchAsync(async (req, res) => {
   });
 });
 
+const getSinglePatient = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await PatientServices.getSinglePatientFromDB(id);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Patient reprieved successfully",
+    data: result,
+  });
+});
+
 export const PatientControllers = {
   getAllPatients,
+  getSinglePatient,
 };

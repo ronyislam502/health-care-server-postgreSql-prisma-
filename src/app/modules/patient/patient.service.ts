@@ -20,6 +20,18 @@ const getAllPatientsFromDB = async (
   return { meta, data };
 };
 
+const getSinglePatientFromDB = async (id: string) => {
+  const result = await prisma.patient.findUniqueOrThrow({
+    where: {
+      id,
+      isDeleted: false,
+    },
+  });
+
+  return result;
+};
+
 export const PatientServices = {
   getAllPatientsFromDB,
+  getSinglePatientFromDB,
 };
