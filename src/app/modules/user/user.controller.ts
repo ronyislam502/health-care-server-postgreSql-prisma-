@@ -1,14 +1,11 @@
-import { User } from "@prisma/client";
 import { TImageFile } from "../../interface/image.interface";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { UserServices } from "./user.service";
 import httpStatus from "http-status";
-import { TLoginUser } from "../auth/auth.interface";
 import { JwtPayload } from "jsonwebtoken";
 
 const CreateAdmin = catchAsync(async (req, res) => {
-  console.log("file", req.file);
   const { password, admin } = req.body;
   const result = await UserServices.CreateAdminIntoDB(
     req.file as TImageFile,
