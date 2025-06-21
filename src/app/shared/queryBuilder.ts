@@ -9,6 +9,7 @@ class QueryBuilder<T> {
     Prisma.Enumerable<Record<string, "asc" | "desc">>
   > = [{ createdAt: "desc" }];
   private select?: Record<string, boolean>;
+  private include?: Record<string, any>;
   private take = 10;
   private skip = 0;
 
@@ -37,31 +38,6 @@ class QueryBuilder<T> {
 
     return this;
   }
-
-  // search(searchableFields: { field: string; isEnum: boolean }[]) {
-  //   const searchTerm = this.query.searchTerm;
-
-  //   if (typeof searchTerm === "string" && searchableFields.length > 0) {
-  //     this.where.OR = searchableFields.map(({ field, isEnum }) => {
-  //       if (isEnum) {
-  //         return {
-  //           [field]: {
-  //             equals: searchTerm, // or searchTerm.toUpperCase() if needed
-  //           },
-  //         };
-  //       } else {
-  //         return {
-  //           [field]: {
-  //             contains: searchTerm,
-  //             mode: "insensitive",
-  //           },
-  //         };
-  //       }
-  //     });
-  //   }
-
-  //   return this;
-  // }
 
   // Filtering logic that supports operators like gte, lte, etc.
   filter() {
@@ -172,12 +148,18 @@ class QueryBuilder<T> {
     return this;
   }
 
+  setInclude(include: Record<string, any>) {
+    this.include = include;
+    return this;
+  }
+
   // Final execution method returning Prisma results
   async execute() {
     return this.modelQuery.findMany({
       where: this.where,
       orderBy: this.orderBy,
       select: this.select,
+      include: this.include,
       skip: this.skip,
       take: this.take,
     });
