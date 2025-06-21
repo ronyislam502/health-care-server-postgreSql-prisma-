@@ -1,3 +1,4 @@
+import { TImageFile } from "../../interface/image.interface";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { DoctorServices } from "./doctor.service";
@@ -39,8 +40,25 @@ const deleteDoctor = catchAsync(async (req, res) => {
   });
 });
 
+const updateDoctor = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await DoctorServices.updateDoctorFromDB(
+    id,
+    req.file as TImageFile,
+    req.body
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Doctor updated successfully",
+    data: result,
+  });
+});
+
 export const DoctorControllers = {
   getAllDoctors,
   getSingleDoctor,
   deleteDoctor,
+  updateDoctor,
 };
