@@ -3,6 +3,7 @@ import QueryBuilder from "../../shared/queryBuilder";
 import { adminSearchableFields } from "./admin.interface";
 import { TMeta } from "../../shared/sendResponse";
 import { Admin, UserStatus } from "@prisma/client";
+import { TImageFile } from "../../interface/image.interface";
 
 const getAllAdminsFromDB = async (
   query: Record<string, unknown>
@@ -32,6 +33,7 @@ const getSingleAdminFromDB = async (id: string): Promise<Admin | null> => {
 
 const updateAdminIntoDB = async (
   id: string,
+  image: TImageFile,
   payload: Partial<Admin>
 ): Promise<Admin | null> => {
   await prisma.admin.findUniqueOrThrow({
@@ -40,6 +42,11 @@ const updateAdminIntoDB = async (
       isDeleted: false,
     },
   });
+
+  const file = image;
+  if (file) {
+    payload.avatar = file.path;
+  }
 
   const updatedAdmin = await prisma.admin.update({
     where: {

@@ -3,6 +3,7 @@ import prisma from "../../shared/prisma";
 import QueryBuilder from "../../shared/queryBuilder";
 import { TMeta } from "../../shared/sendResponse";
 import { doctorSearchableFields } from "./doctor.interface";
+import { TImageFile } from "../../interface/image.interface";
 
 const getAllDoctorsFromDB = async (
   query: Record<string, unknown>
@@ -64,8 +65,38 @@ const deleteDoctorFromDB = async (id: string): Promise<Doctor | null> => {
   return result;
 };
 
+const updateDoctorFromDB = async (
+  id: string,
+  image: TImageFile,
+  payload: Partial<Doctor>
+) => {
+  await prisma.doctor.findUniqueOrThrow({
+    where: {
+      id,
+      isDeleted: false,
+    },
+  });
+
+  const file = image;
+  if (file) {
+    payload.avatar = file.path;
+  }
+
+  const result = await prisma.$transaction(async (transactionClient) => {
+    await transactionClient.doctor.update({
+      where: {
+        id,
+      },
+      data: payload,
+    });
+  });
+
+  return result;
+};
+
 export const DoctorServices = {
   getAllDoctorsFromDB,
   getSingleDoctorFromDB,
   deleteDoctorFromDB,
+  updateDoctorFromDB,
 };

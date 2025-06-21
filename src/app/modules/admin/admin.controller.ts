@@ -1,3 +1,4 @@
+import { TImageFile } from "../../interface/image.interface";
 import catchAsync from "../../shared/catchAsync";
 import sendResponse from "../../shared/sendResponse";
 import { AdminServices } from "./admin.service";
@@ -30,7 +31,11 @@ const getSingleAdmin = catchAsync(async (req, res) => {
 
 const updateAdmin = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await AdminServices.updateAdminIntoDB(id, req.body);
+  const result = await AdminServices.updateAdminIntoDB(
+    id,
+    req.file as TImageFile,
+    req.body
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
