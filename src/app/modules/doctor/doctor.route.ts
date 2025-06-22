@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { DoctorControllers } from "./doctor.controller";
+import { multerUpload } from "../../config/multer.config";
+import { parseBody } from "../../middlewares/bodyParser";
 
 const router = Router();
 

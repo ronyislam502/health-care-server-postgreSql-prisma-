@@ -2,8 +2,7 @@ import { Doctor, Specialty, UserStatus } from "@prisma/client";
 import prisma from "../../shared/prisma";
 import QueryBuilder from "../../shared/queryBuilder";
 import { TMeta } from "../../shared/sendResponse";
-import { doctorSearchableFields } from "./doctor.interface";
-import { TImageFile } from "../../interface/image.interface";
+import { doctorSearchableFields, TDoctorUpdate } from "./doctor.interface";
 
 const getAllDoctorsFromDB = async (
   query: Record<string, unknown>
@@ -81,8 +80,7 @@ const deleteDoctorFromDB = async (id: string): Promise<Doctor | null> => {
 
 const updateDoctorFromDB = async (
   id: string,
-  image: TImageFile,
-  payload: any
+  payload: Partial<TDoctorUpdate>
 ) => {
   // console.log("uu", payload);
   const { specialties, ...doctorData } = payload;
@@ -92,11 +90,6 @@ const updateDoctorFromDB = async (
       isDeleted: false,
     },
   });
-
-  const file = image;
-  if (file) {
-    payload.avatar = file.path;
-  }
 
   await prisma.$transaction(async (transactionClient) => {
     await prisma.doctor.update({
@@ -111,8 +104,8 @@ const updateDoctorFromDB = async (
 
     if (specialties && specialties.length > 0) {
       // delete specialties
-      const deleteDoctorSpecialties = await specialties.filter(
-        (specialty: any) => specialty.isDeleted
+      const deleteDoctorSpecialties = specialties.filter(
+        (specialty) => specialty.isDeleted
       );
       // console.log("dele", deleteSpecialtiesIds);
       for (const specialty of deleteDoctorSpecialties) {
@@ -125,8 +118,8 @@ const updateDoctorFromDB = async (
       }
 
       // create specialties
-      const createDoctorSpecialties = await specialties.filter(
-        (specialty: any) => !specialty.isDeleted
+      const createDoctorSpecialties = specialties.filter(
+        (specialty) => !specialty.isDeleted
       );
 
       // console.log("cre", createDoctorSpecialties);
