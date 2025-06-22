@@ -1,4 +1,4 @@
-import QueryBuilder from "../../shared/queryBuilder";
+import QueryBuilder from "../../shared/queryBuilder2";
 import { hashPassword } from "../../shared/bcryptHelpers";
 import config from "../../config";
 import { TImageFile } from "../../interface/image.interface";

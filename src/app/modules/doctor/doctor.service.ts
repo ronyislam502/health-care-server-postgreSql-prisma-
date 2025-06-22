@@ -1,13 +1,14 @@
-import { Doctor, Specialty, UserStatus } from "@prisma/client";
+import { Doctor, UserStatus } from "@prisma/client";
 import prisma from "../../shared/prisma";
-import QueryBuilder from "../../shared/queryBuilder";
 import { TMeta } from "../../shared/sendResponse";
 import { doctorSearchableFields, TDoctorUpdate } from "./doctor.interface";
+import QueryBuilder from "../../builder/queryBuilder";
+import healthQueryBuilder from "../../builder/HealthQueryBuilder";
 
 const getAllDoctorsFromDB = async (
   query: Record<string, unknown>
 ): Promise<{ meta: TMeta; data: Doctor[] }> => {
-  const doctorQuery = new QueryBuilder(prisma.doctor, query)
+  const doctorQuery = new healthQueryBuilder(prisma.doctor, query)
     .search(doctorSearchableFields)
     .filter()
     .sort()

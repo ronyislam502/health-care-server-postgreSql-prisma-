@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 
-class QueryBuilder<T> {
+class QueryBuilder2<T> {
   private modelQuery: any;
   private query: Record<string, unknown>;
 
@@ -40,77 +40,10 @@ class QueryBuilder<T> {
   }
 
   // Filtering logic that supports operators like gte, lte, etc.
-  // filter() {
-  //   const { AND, OR, NOT, searchTerm, sort, page, limit, fields, ...filters } =
-  //     this.query;
-
-  //   for (const key in filters) {
-  //     const value = filters[key];
-
-  //     if (
-  //       typeof value === "object" &&
-  //       value !== null &&
-  //       !Array.isArray(value)
-  //     ) {
-  //       this.where[key] = {};
-  //       for (const operator in value) {
-  //         const operatorValue = (value as Record<string, unknown>)[operator];
-
-  //         if (
-  //           typeof operatorValue === "string" &&
-  //           !isNaN(Number(operatorValue))
-  //         ) {
-  //           (this.where[key] as Record<string, any>)[operator] =
-  //             Number(operatorValue);
-  //         } else if (typeof operatorValue === "number") {
-  //           (this.where[key] as Record<string, any>)[operator] = operatorValue;
-  //         } else {
-  //           (this.where[key] as Record<string, any>)[operator] = operatorValue;
-  //         }
-  //       }
-  //     } else {
-  //       if (typeof value === "string" && !isNaN(Number(value))) {
-  //         this.where[key] = { equals: Number(value) };
-  //       } else if (typeof value === "number") {
-  //         this.where[key] = { equals: value };
-  //       } else {
-  //         this.where[key] = { equals: value };
-  //       }
-  //     }
-  //   }
-
-  //   if (AND) this.where.AND = AND;
-  //   if (OR)
-  //     this.where.OR = [...((this.where.OR as any[]) || []), ...(OR as any[])];
-  //   if (NOT) this.where.NOT = NOT;
-
-  //   return this;
-  // }
-
   filter() {
     const { AND, OR, NOT, searchTerm, sort, page, limit, fields, ...filters } =
       this.query;
 
-    //Custom logic: filter by specialties.title
-    if (filters.specialties) {
-      const specialtiesArray = Array.isArray(filters.specialties)
-        ? filters.specialties
-        : [filters.specialties];
-
-      this.where.doctorSpecialties = {
-        some: {
-          specialties: {
-            title: {
-              in: specialtiesArray as string[],
-            },
-          },
-        },
-      };
-
-      delete filters.specialties; // prevent double-processing
-    }
-
-    // Generic filter logic for flat fields
     for (const key in filters) {
       const value = filters[key];
 
@@ -122,16 +55,27 @@ class QueryBuilder<T> {
         this.where[key] = {};
         for (const operator in value) {
           const operatorValue = (value as Record<string, unknown>)[operator];
-          (this.where[key] as Record<string, any>)[operator] =
-            typeof operatorValue === "string" && !isNaN(Number(operatorValue))
-              ? Number(operatorValue)
-              : operatorValue;
+
+          if (
+            typeof operatorValue === "string" &&
+            !isNaN(Number(operatorValue))
+          ) {
+            (this.where[key] as Record<string, any>)[operator] =
+              Number(operatorValue);
+          } else if (typeof operatorValue === "number") {
+            (this.where[key] as Record<string, any>)[operator] = operatorValue;
+          } else {
+            (this.where[key] as Record<string, any>)[operator] = operatorValue;
+          }
         }
       } else {
-        this.where[key] =
-          typeof value === "string" && !isNaN(Number(value))
-            ? { equals: Number(value) }
-            : { equals: value };
+        if (typeof value === "string" && !isNaN(Number(value))) {
+          this.where[key] = { equals: Number(value) };
+        } else if (typeof value === "number") {
+          this.where[key] = { equals: value };
+        } else {
+          this.where[key] = { equals: value };
+        }
       }
     }
 
@@ -142,8 +86,6 @@ class QueryBuilder<T> {
 
     return this;
   }
-
-  // Custom handling for specialties filtering
 
   // Sorting logic for fields with '-' prefix for descending
   sort() {
@@ -224,4 +166,4 @@ class QueryBuilder<T> {
   }
 }
 
-export default QueryBuilder;
+export default QueryBuilder2;

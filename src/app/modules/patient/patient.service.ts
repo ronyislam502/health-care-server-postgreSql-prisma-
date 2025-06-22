@@ -1,9 +1,8 @@
 import { Patient, UserStatus } from "@prisma/client";
 import prisma from "../../shared/prisma";
-import QueryBuilder from "../../shared/queryBuilder";
 import { TMeta } from "../../shared/sendResponse";
 import { IPatientUpdate, patientSearchableFields } from "./patient.interface";
-import { TImageFile } from "../../interface/image.interface";
+import QueryBuilder from "../../builder/queryBuilder";
 
 const getAllPatientsFromDB = async (
   query: Record<string, unknown>
