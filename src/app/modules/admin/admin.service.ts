@@ -3,12 +3,12 @@ import { adminSearchableFields } from "./admin.interface";
 import { TMeta } from "../../shared/sendResponse";
 import { Admin, UserStatus } from "@prisma/client";
 import { TImageFile } from "../../interface/image.interface";
-import QueryBuilder from "../../builder/queryBuilder";
+import HealthQueryBuilder from "../../builder/healthQuery";
 
 const getAllAdminsFromDB = async (
   query: Record<string, unknown>
 ): Promise<{ meta: TMeta; data: Admin[] }> => {
-  const queryBuilder = new QueryBuilder(prisma.admin, query)
+  const queryBuilder = new HealthQueryBuilder(prisma.admin, query)
     .search(adminSearchableFields)
     .filter()
     .sort()

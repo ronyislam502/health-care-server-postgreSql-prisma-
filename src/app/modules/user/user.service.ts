@@ -1,4 +1,3 @@
-import QueryBuilder from "../../shared/queryBuilder2";
 import { hashPassword } from "../../shared/bcryptHelpers";
 import config from "../../config";
 import { TImageFile } from "../../interface/image.interface";
@@ -6,6 +5,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { userSearchableFields } from "./user.interface";
 import prisma, { TransactionClient } from "../../shared/prisma";
 import { Admin, Doctor, Patient, UserRole, UserStatus } from "@prisma/client";
+import HealthQueryBuilder from "../../builder/healthQuery";
 
 const CreateAdminIntoDB = async (
   image: TImageFile,
@@ -129,7 +129,7 @@ const CreatePatientIntoDB = async (
 };
 
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {
-  const queryBuilder = new QueryBuilder(prisma.user, query)
+  const queryBuilder = new HealthQueryBuilder(prisma.user, query)
     .search(userSearchableFields)
     .filter()
     .sort()

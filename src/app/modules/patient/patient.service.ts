@@ -2,12 +2,12 @@ import { Patient, UserStatus } from "@prisma/client";
 import prisma from "../../shared/prisma";
 import { TMeta } from "../../shared/sendResponse";
 import { IPatientUpdate, patientSearchableFields } from "./patient.interface";
-import QueryBuilder from "../../builder/queryBuilder";
+import HealthQueryBuilder from "../../builder/healthQuery";
 
 const getAllPatientsFromDB = async (
   query: Record<string, unknown>
 ): Promise<{ meta: TMeta; data: Patient[] }> => {
-  const patientQuery = new QueryBuilder(prisma.patient, query)
+  const patientQuery = new HealthQueryBuilder(prisma.patient, query)
     .search(patientSearchableFields)
     .filter()
     .sort()

@@ -39,7 +39,7 @@ const getSingleSchedule = catchAsync(async (req, res) => {
 
 const deleteSchedule = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const result = await ScheduleServices.getSingleScheduleFromDB(id);
+  const result = await ScheduleServices.deleteScheduleFromDB(id);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { ScheduleControllers } from "./schedule.controller";
-import auth from "../../middlewares/auth";
 import { UserRole } from "@prisma/client";
+import auth from "../../middlewares/auth";
 
 const router = Router();
 
@@ -13,13 +13,13 @@ router.post(
 
 router.get(
   "/",
-  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTOR),
   ScheduleControllers.getAllSchedules
 );
 
 router.get(
   "/:id",
-  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.DOCTOR),
   ScheduleControllers.getSingleSchedule
 );
 

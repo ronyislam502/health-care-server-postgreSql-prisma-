@@ -5,7 +5,7 @@ class QueryBuilder<T> {
   private query: Record<string, unknown>;
 
   protected where: Record<string, unknown> = {};
-  private orderBy: Prisma.Enumerable<
+  private orderBy?: Prisma.Enumerable<
     Prisma.Enumerable<Record<string, "asc" | "desc">>
   > = [{ createdAt: "desc" }];
   private select?: Record<string, boolean>;
@@ -83,18 +83,22 @@ class QueryBuilder<T> {
   protected addCustomFilters(filters: Record<string, any>) {}
 
   // Sorting logic for fields with '-' prefix for descending
+
   sort() {
     if (typeof this.query.sort === "string") {
-      this.orderBy = this.query.sort.split(",").map((field) => {
+      const parsedOrderBy = this.query.sort.split(",").map((field) => {
         if (field.startsWith("-")) {
           return { [field.substring(1)]: "desc" as const };
         } else {
           return { [field]: "asc" as const };
         }
       });
+
+      this.orderBy = parsedOrderBy;
     } else {
-      this.orderBy = [{ createdAt: "desc" }];
+      this.orderBy = undefined;
     }
+
     return this;
   }
 

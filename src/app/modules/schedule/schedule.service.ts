@@ -1,8 +1,8 @@
 import { addHours, addMinutes, format } from "date-fns";
 import { TSchedule } from "./schedule.interface";
 import prisma from "../../shared/prisma";
-import healthQueryBuilder from "../../builder/HealthQueryBuilder";
 import { Schedule } from "@prisma/client";
+import HealthQueryBuilder from "../../builder/healthQuery";
 
 const createScheduleIntoDB = async (
   payload: TSchedule
@@ -61,7 +61,7 @@ const createScheduleIntoDB = async (
 };
 
 const getAllSchedulesFromDB = async (query: Record<string, unknown>) => {
-  const scheduleQuery = new healthQueryBuilder(prisma.schedule, query)
+  const scheduleQuery = new HealthQueryBuilder(prisma.schedule, query)
     .filter()
     .sort()
     .paginate()

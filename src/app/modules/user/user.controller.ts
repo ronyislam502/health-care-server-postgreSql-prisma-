@@ -54,9 +54,7 @@ const CreatePatient = catchAsync(async (req, res) => {
 });
 
 const getAllUsers = catchAsync(async (req, res) => {
-  const query = { ...req.query };
-  console.log("qq", query);
-  const result = await UserServices.getAllUsersFromDB(query);
+  const result = await UserServices.getAllUsersFromDB(req.query);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -92,7 +90,6 @@ const changeProfileStatus = catchAsync(async (req, res) => {
 });
 
 const getMyProfile = catchAsync(async (req, res) => {
-  console.log("user", req.user);
   const user = req.user;
   const result = await UserServices.getMyProfileFromDB(user);
 
