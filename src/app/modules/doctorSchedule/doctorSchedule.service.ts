@@ -1,8 +1,9 @@
 import { JwtPayload } from "jsonwebtoken";
 import prisma from "../../shared/prisma";
 import HealthQueryBuilder from "../../builder/healthQuery";
+import AppError from "../../errors/AppError";
 
-const createDoctorSchedule = async (user: any, payload: any) => {
+const createDoctorScheduleIntoDB = async (user: any, payload: any) => {
   const isDoctor = await prisma.doctor.findUniqueOrThrow({
     where: {
       email: user.email,
@@ -42,6 +43,7 @@ const getMyScheduleFromDB = async (
     .paginate()
     .fields()
     .setInclude({
+      schedule: true,
       doctor: true,
     });
 
@@ -49,20 +51,44 @@ const getMyScheduleFromDB = async (
   const data = await doctorScheduleQuery.execute();
 
   return { meta, data };
+};
 
-  //   const schedules = await prisma.doctorSchedules.findMany({
-  //     where: {
-  //       doctorId: isDoctor.id,
-  //     },
-  //     include: {
-  //       doctor: true,
-  //     },
-  //   });
+const deleteDoctorScheduleFromDB = async (user: JwtPayload, id: string) => {
+  const isDoctor = await prisma.doctor.findUniqueOrThrow({
+    where: {
+      email: user.email,
+    },
+  });
 
-  //   return schedules;
+  const isBookedSchedule = await prisma.doctorSchedules.findFirst({
+    where: {
+      doctorId: isDoctor.id,
+      scheduleId: id,
+      isBooked: true,
+    },
+  });
+
+  if (isBookedSchedule) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "You can not delete this schedule cause schedule already booked!"
+    );
+  }
+
+  const result = await prisma.doctorSchedules.delete({
+    where: {
+      doctorId_scheduleId: {
+        doctorId: isDoctor.id,
+        scheduleId: id,
+      },
+    },
+  });
+
+  return result;
 };
 
 export const DoctorScheduleServices = {
-  createDoctorSchedule,
+  createDoctorScheduleIntoDB,
   getMyScheduleFromDB,
+  deleteDoctorScheduleFromDB,
 };

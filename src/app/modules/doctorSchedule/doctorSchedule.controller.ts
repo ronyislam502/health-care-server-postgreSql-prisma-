@@ -4,7 +4,7 @@ import { DoctorScheduleServices } from "./doctorSchedule.service";
 import httpStatus from "http-status";
 
 const createDoctorSchedule = catchAsync(async (req, res) => {
-  const result = await DoctorScheduleServices.createDoctorSchedule(
+  const result = await DoctorScheduleServices.createDoctorScheduleIntoDB(
     req.user,
     req.body
   );
@@ -31,7 +31,23 @@ const getMySchedule = catchAsync(async (req, res) => {
   });
 });
 
+const deleteDoctorSchedule = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await DoctorScheduleServices.deleteDoctorScheduleFromDB(
+    req.user,
+    id
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Doctor schedules deleted successfully",
+    data: result,
+  });
+});
+
 export const DoctorScheduleControllers = {
   createDoctorSchedule,
   getMySchedule,
+  deleteDoctorSchedule,
 };
