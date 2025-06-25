@@ -8,4 +8,12 @@
 //   { field: "patient.name", isEnum: false }, // nested
 // ];
 
-export const userSearchableFields = ["name", "email"];
+export const userSearchableFields = [
+  "email",
+  "doctor.name",
+  "patient.name",
+  "admin.name",
+  "doctor.phone",
+  "patient.phone",
+  "admin.phone",
+];

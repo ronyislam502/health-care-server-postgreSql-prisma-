@@ -4,7 +4,7 @@ class QueryBuilder2<T> {
   private modelQuery: any;
   private query: Record<string, unknown>;
 
-  private where: Record<string, unknown> = {};
+  protected where: Record<string, any> = {};
   private orderBy: Prisma.Enumerable<
     Prisma.Enumerable<Record<string, "asc" | "desc">>
   > = [{ createdAt: "desc" }];
@@ -18,8 +18,6 @@ class QueryBuilder2<T> {
     this.query = query;
   }
 
-  // Search by searchable fields with Prisma's 'contains' and insensitive mode
-
   search(searchableFields: string[]) {
     const searchTerm = this.query.searchTerm;
 
@@ -28,6 +26,20 @@ class QueryBuilder2<T> {
     }
 
     this.where.OR = searchableFields.map((field) => {
+      const match = field.match(/^(\w+)\.(\w+)$/);
+
+      if (match) {
+        const [, relation, relField] = match;
+        return {
+          [relation]: {
+            [relField]: {
+              contains: searchTerm,
+              mode: "insensitive",
+            },
+          },
+        };
+      }
+
       return {
         [field]: {
           contains: searchTerm,
@@ -39,42 +51,76 @@ class QueryBuilder2<T> {
     return this;
   }
 
-  // Filtering logic that supports operators like gte, lte, etc.
   filter() {
     const { AND, OR, NOT, searchTerm, sort, page, limit, fields, ...filters } =
       this.query;
 
+    // 👉 call subclass hook for custom filtering
+    this.addCustomFilters(filters);
+
+    const operators = [
+      "gte",
+      "lte",
+      "gt",
+      "lt",
+      "equals",
+      "contains",
+      "in",
+      "startsWith",
+      "endsWith",
+    ];
+
     for (const key in filters) {
-      const value = filters[key];
+      let value: any = filters[key];
+      let operator: string | null = null;
 
-      if (
-        typeof value === "object" &&
-        value !== null &&
-        !Array.isArray(value)
-      ) {
-        this.where[key] = {};
-        for (const operator in value) {
-          const operatorValue = (value as Record<string, unknown>)[operator];
-
-          if (
-            typeof operatorValue === "string" &&
-            !isNaN(Number(operatorValue))
-          ) {
-            (this.where[key] as Record<string, any>)[operator] =
-              Number(operatorValue);
-          } else if (typeof operatorValue === "number") {
-            (this.where[key] as Record<string, any>)[operator] = operatorValue;
-          } else {
-            (this.where[key] as Record<string, any>)[operator] = operatorValue;
-          }
+      for (const op of operators) {
+        if (key.endsWith("." + op)) {
+          operator = op;
+          break;
         }
-      } else {
-        if (typeof value === "string" && !isNaN(Number(value))) {
-          this.where[key] = { equals: Number(value) };
-        } else if (typeof value === "number") {
-          this.where[key] = { equals: value };
+      }
+
+      let path = key;
+      if (operator) {
+        path = key.slice(0, -(operator.length + 1));
+      }
+
+      if (typeof value === "string") {
+        if (!isNaN(Date.parse(value)) && path.toLowerCase().includes("date")) {
+          value = new Date(value);
+        } else if (!isNaN(Number(value))) {
+          value = Number(value);
+        }
+      }
+
+      if (operator) {
+        value = { [operator]: value };
+      } else if (typeof value !== "object" || Array.isArray(value)) {
+        value = { equals: value };
+      }
+
+      const parts = path.split(".");
+      let current = this.where;
+
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+
+        if (i === parts.length - 1) {
+          if (
+            part in current &&
+            typeof current[part] === "object" &&
+            !Array.isArray(current[part])
+          ) {
+            current[part] = { ...current[part], ...value };
+          } else {
+            current[part] = value;
+          }
         } else {
-          this.where[key] = { equals: value };
+          if (!(part in current) || typeof current[part] !== "object") {
+            current[part] = {};
+          }
+          current = current[part];
         }
       }
     }
@@ -87,7 +133,9 @@ class QueryBuilder2<T> {
     return this;
   }
 
-  // Sorting logic for fields with '-' prefix for descending
+  // ✅ You can override this in a subclass
+  protected addCustomFilters(filters: Record<string, any>) {}
+
   sort() {
     if (typeof this.query.sort === "string") {
       this.orderBy = this.query.sort.split(",").map((field) => {
@@ -103,7 +151,6 @@ class QueryBuilder2<T> {
     return this;
   }
 
-  // Selecting specific fields
   fields() {
     const fields = this.query.fields;
     if (typeof fields === "string") {
@@ -113,7 +160,6 @@ class QueryBuilder2<T> {
     return this;
   }
 
-  // Pagination: page and limit -> skip & take
   paginate() {
     const pageRaw = this.query.page;
     const limitRaw = this.query.limit;
@@ -126,7 +172,6 @@ class QueryBuilder2<T> {
     return this;
   }
 
-  // Optional: get total count and pagination meta
   async countTotal() {
     const total = await this.modelQuery.count({ where: this.where });
     const page =
@@ -153,7 +198,6 @@ class QueryBuilder2<T> {
     return this;
   }
 
-  // Final execution method returning Prisma results
   async execute() {
     return this.modelQuery.findMany({
       where: this.where,

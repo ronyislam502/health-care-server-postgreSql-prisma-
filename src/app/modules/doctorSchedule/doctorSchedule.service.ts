@@ -22,6 +22,26 @@ const createDoctorScheduleIntoDB = async (user: any, payload: any) => {
   return result;
 };
 
+const getAllDoctorScheduleFromDB = async (query: Record<string, unknown>) => {
+  const doctorScheduleQuery = new HealthQueryBuilder(
+    prisma.doctorSchedules,
+    query
+  )
+    .filter()
+    .sort()
+    .paginate()
+    .fields()
+    .setInclude({
+      doctor: true,
+      schedule: true,
+    });
+
+  const meta = await doctorScheduleQuery.countTotal();
+  const data = await doctorScheduleQuery.execute();
+
+  return { meta, data };
+};
+
 const getMyScheduleFromDB = async (
   user: JwtPayload,
   query: Record<string, unknown>
@@ -91,4 +111,5 @@ export const DoctorScheduleServices = {
   createDoctorScheduleIntoDB,
   getMyScheduleFromDB,
   deleteDoctorScheduleFromDB,
+  getAllDoctorScheduleFromDB,
 };

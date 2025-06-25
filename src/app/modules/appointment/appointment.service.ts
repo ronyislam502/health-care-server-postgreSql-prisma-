@@ -113,24 +113,7 @@ const getMyAppointmentsFromDB = async (
   const meta = await appointmentQuery.countTotal();
   const data = await appointmentQuery.execute();
 
-  return { meta, data };
-};
-
-const getBooking = async (email: string, query: Record<string, unknown>) => {
-  // const isUser = await prisma.user.findUniqueOrThrow({
-  //   where: {
-  //     email,
-  //   },
-  // });
-
-  const appointmentQuery = new HealthQueryBuilder(prisma.appointment, query)
-    .filter()
-    .paginate()
-    .sort()
-    .fields();
-
-  const meta = await appointmentQuery.countTotal();
-  const data = await appointmentQuery.execute();
+  console.log(data?.patient?.email);
 
   return { meta, data };
 };
@@ -138,5 +121,4 @@ const getBooking = async (email: string, query: Record<string, unknown>) => {
 export const AppointmentServices = {
   createAppointmentIntoDB,
   getMyAppointmentsFromDB,
-  getBooking,
 };

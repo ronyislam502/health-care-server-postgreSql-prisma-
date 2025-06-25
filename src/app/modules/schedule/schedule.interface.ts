@@ -5,4 +5,4 @@ export type TSchedule = {
   endTime: string;
 };
 
-export const searchableFields = ["startDateTime", "endDateTime"];
+// export const searchableFields = ["startDateTime", "endDateTime"];

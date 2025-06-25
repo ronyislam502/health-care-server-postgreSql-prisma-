@@ -12,12 +12,6 @@ router.post(
 );
 
 router.get(
-  "/my-appointments/:email",
-  // auth(UserRole.PATIENT, UserRole.DOCTOR),
-  AppointmentControllers.MyBooking
-);
-
-router.get(
   "/my-appointments",
   auth(UserRole.PATIENT, UserRole.DOCTOR),
   AppointmentControllers.getMyAppointment

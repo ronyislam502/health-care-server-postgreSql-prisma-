@@ -17,6 +17,20 @@ const createDoctorSchedule = catchAsync(async (req, res) => {
   });
 });
 
+const allDoctorSchedules = catchAsync(async (req, res) => {
+  const result = await DoctorScheduleServices.getAllDoctorScheduleFromDB(
+    req.query
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Doctors schedules retrieved successfully",
+    meta: result.meta,
+    data: result.data,
+  });
+});
+
 const getMySchedule = catchAsync(async (req, res) => {
   const result = await DoctorScheduleServices.getMyScheduleFromDB(
     req.user,
@@ -27,7 +41,8 @@ const getMySchedule = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: "Doctor schedules retrieved successfully",
-    data: result,
+    meta: result.meta,
+    data: result.data,
   });
 });
 
@@ -48,6 +63,7 @@ const deleteDoctorSchedule = catchAsync(async (req, res) => {
 
 export const DoctorScheduleControllers = {
   createDoctorSchedule,
+  allDoctorSchedules,
   getMySchedule,
   deleteDoctorSchedule,
 };

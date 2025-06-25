@@ -4,7 +4,7 @@ class QueryBuilder<T> {
   private modelQuery: any;
   private query: Record<string, unknown>;
 
-  protected where: Record<string, unknown> = {};
+  protected where: Record<string, any> = {};
   private orderBy?: Prisma.Enumerable<
     Prisma.Enumerable<Record<string, "asc" | "desc">>
   > = [{ createdAt: "desc" }];
@@ -18,7 +18,6 @@ class QueryBuilder<T> {
     this.query = query;
   }
 
-  // Search by searchable fields with Prisma's 'contains' and insensitive mode
   search(searchableFields: string[]) {
     const searchTerm = this.query.searchTerm;
 
@@ -27,6 +26,20 @@ class QueryBuilder<T> {
     }
 
     this.where.OR = searchableFields.map((field) => {
+      const match = field.match(/^(\w+)\.(\w+)$/);
+
+      if (match) {
+        const [, relation, relField] = match;
+        return {
+          [relation]: {
+            [relField]: {
+              contains: searchTerm,
+              mode: "insensitive",
+            },
+          },
+        };
+      }
+
       return {
         [field]: {
           contains: searchTerm,
@@ -38,36 +51,89 @@ class QueryBuilder<T> {
     return this;
   }
 
-  // Filtering logic that supports operators like gte, lte, etc.
   filter() {
     const { AND, OR, NOT, searchTerm, sort, page, limit, fields, ...filters } =
       this.query;
 
-    // Call to allow subclasses to add custom filters
     this.addCustomFilters(filters);
 
-    // Generic filter logic for flat fields
-    for (const key in filters) {
-      const value = filters[key];
+    const operators = [
+      "gte",
+      "lte",
+      "gt",
+      "lt",
+      "equals",
+      "contains",
+      "in",
+      "startsWith",
+      "endsWith",
+    ];
 
-      if (
-        typeof value === "object" &&
-        value !== null &&
-        !Array.isArray(value)
-      ) {
-        this.where[key] = {};
-        for (const operator in value) {
-          const operatorValue = (value as Record<string, unknown>)[operator];
-          (this.where[key] as Record<string, any>)[operator] =
-            typeof operatorValue === "string" && !isNaN(Number(operatorValue))
-              ? Number(operatorValue)
-              : operatorValue;
+    for (const key in filters) {
+      let value: any = filters[key];
+      let operator: string | null = null;
+
+      for (const op of operators) {
+        if (key.endsWith("." + op)) {
+          operator = op;
+          break;
         }
-      } else {
-        this.where[key] =
-          typeof value === "string" && !isNaN(Number(value))
-            ? { equals: Number(value) }
-            : { equals: value };
+      }
+
+      let path = key;
+      if (operator) {
+        path = key.slice(0, -(operator.length + 1));
+      }
+
+      // Type coercion
+      if (typeof value === "string") {
+        if (value.toLowerCase() === "true") {
+          value = true;
+        } else if (value.toLowerCase() === "false") {
+          value = false;
+        } else if (
+          !isNaN(Date.parse(value)) &&
+          path.toLowerCase().includes("date")
+        ) {
+          value = new Date(value);
+        } else if (!isNaN(Number(value))) {
+          value = Number(value);
+        }
+      }
+
+      if (operator) {
+        value = { [operator]: value };
+      } else if (typeof value !== "object" || Array.isArray(value)) {
+        value = { equals: value };
+      }
+
+      const parts = path.split(".");
+      let current: Record<string, any> = this.where;
+
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+
+        if (i === parts.length - 1) {
+          const existing = current[part];
+          if (
+            typeof existing === "object" &&
+            existing !== null &&
+            !Array.isArray(existing)
+          ) {
+            current[part] = { ...existing, ...value };
+          } else {
+            current[part] = value;
+          }
+        } else {
+          if (
+            typeof current[part] !== "object" ||
+            current[part] === null ||
+            Array.isArray(current[part])
+          ) {
+            current[part] = {};
+          }
+          current = current[part];
+        }
       }
     }
 
@@ -79,8 +145,9 @@ class QueryBuilder<T> {
     return this;
   }
 
-  // Protected method to be overridden in subclasses for project-specific filters
-  protected addCustomFilters(filters: Record<string, any>) {}
+  protected addCustomFilters(filters: Record<string, any>) {
+    // Override if needed
+  }
 
   // Sorting logic for fields with '-' prefix for descending
 
