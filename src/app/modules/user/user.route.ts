@@ -13,7 +13,7 @@ const router = Router();
 
 router.post(
   "/create-admin",
-  // auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
   multerUpload.single("image"),
   parseBody,
   validateRequest(AdminValidations.createAdminValidationSchema),
@@ -38,7 +38,11 @@ router.post(
   UserControllers.CreatePatient
 );
 
-router.get("/", UserControllers.getAllUsers);
+router.get(
+  "/",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+  UserControllers.getAllUsers
+);
 
 router.get(
   "/my-profile",
@@ -46,9 +50,17 @@ router.get(
   UserControllers.getMyProfile
 );
 
-router.get("/:email", UserControllers.getSingleUser);
+router.get(
+  "/:email",
+  auth(UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT, UserRole.SUPER_ADMIN),
+  UserControllers.getSingleUser
+);
 
-router.patch("/:id/status", UserControllers.changeProfileStatus);
+router.patch(
+  "/:id/status",
+  auth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
+  UserControllers.changeProfileStatus
+);
 
 router.patch(
   "/update-my-profile",

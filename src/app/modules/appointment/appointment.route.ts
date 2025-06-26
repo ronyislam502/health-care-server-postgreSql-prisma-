@@ -17,4 +17,6 @@ router.get(
   AppointmentControllers.getMyAppointment
 );
 
+router.get("/", auth(UserRole.PATIENT), AppointmentControllers.allAppointments);
+
 export const AppointmentRoutes = router;

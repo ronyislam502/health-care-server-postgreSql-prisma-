@@ -2,35 +2,68 @@ import QueryBuilder from "./queryBuilder";
 
 class HealthQueryBuilder<T> extends QueryBuilder<T> {
   protected addCustomFilters(filters: Record<string, any>) {
-    if (filters.doctorEmail) {
-      this.where.doctor = {
-        ...(this.where.doctor || {}),
-        email: {
-          contains: filters.doctorEmail,
-          mode: "insensitive",
-        },
+    // if (filters.doctorEmail) {
+    //   this.where.doctor = {
+    //     ...(this.where.doctor || {}),
+    //     email: {
+    //       contains: filters.doctorEmail,
+    //       mode: "insensitive",
+    //     },
+    //   };
+    //   delete filters.doctorEmail;
+    // }
+
+    if (
+      filters.excludeScheduleIds &&
+      Array.isArray(filters.excludeScheduleIds)
+    ) {
+      this.where.id = {
+        notIn: filters.excludeScheduleIds,
       };
-      delete filters.doctorEmail;
+      delete filters.excludeScheduleIds;
     }
 
-    if (filters.startDate) {
-      const date = filters.startDate;
+    // const andConditions = this.where.AND || [];
+
+    if (filters.startDate && filters.endDate) {
       const startTime = filters.startTime || "00:00";
       const endTime = filters.endTime || "23:59";
-      const startDateTime = new Date(`${date}T${startTime}:00Z`);
-      const endDateTime = new Date(`${date}T${endTime}:00Z`);
 
-      this.where.schedule = {
-        ...(this.where.schedule || {}),
-        startDateTime: {
-          gte: startDateTime,
-          lt: endDateTime,
-        },
-      };
+      const startDateTime = new Date(
+        `${filters.startDate}T${startTime}:00+06:00`
+      );
+      const endDateTime = new Date(`${filters.endDate}T${endTime}:00+06:00`);
+
+      this.where.AND = [
+        { startDateTime: { gte: startDateTime } },
+        { endDateTime: { lte: endDateTime } },
+      ];
+      // andConditions.push(
+      //   { startDateTime: { gte: startDateTime } },
+      //   { endDateTime: { lte: endDateTime } }
+      // );
 
       delete filters.startDate;
+      delete filters.endDate;
       delete filters.startTime;
       delete filters.endTime;
+    }
+
+    if (filters.startDate && !filters.endDate) {
+      const startDateTime = new Date(`${filters.startDate}T00:00:00+06:00`);
+      const endDateTime = new Date(`${filters.startDate}T23:59:59+06:00`);
+
+      this.where.AND = [
+        { startDateTime: { gte: startDateTime } },
+        { endDateTime: { lte: endDateTime } },
+      ];
+
+      // andConditions.push(
+      //   { startDateTime: { gte: startDateTime } },
+      //   { endDateTime: { lte: endDateTime } }
+      // );
+
+      delete filters.startDate;
     }
   }
 }

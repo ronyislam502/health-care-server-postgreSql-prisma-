@@ -60,6 +60,28 @@ const createAppointmentIntoDB = async (user: JwtPayload, payload: any) => {
         appointmentId: appointmentData.id,
       },
     });
+
+    const today = new Date();
+    console.log("to", today);
+    const transactionId =
+      "HC" +
+      today.getFullYear() +
+      +today.getMonth() +
+      +today.getDay() +
+      +today.getHours() +
+      +today.getMinutes() +
+      +today.getSeconds();
+
+    console.log("trans_id", transactionId);
+
+    await transactionClient.payment.create({
+      data: {
+        appointmentId: appointmentData.id,
+        amount: isDoctor.appointmentFee,
+        transactionId,
+      },
+    });
+
     return appointmentData;
   });
 
@@ -118,7 +140,30 @@ const getMyAppointmentsFromDB = async (
   return { meta, data };
 };
 
+const getAllAppointmentsFromDB = async (query: Record<string, unknown>) => {
+  const appointmentsQuery = new HealthQueryBuilder(prisma.appointment, query)
+    .filter()
+    .sort()
+    .paginate()
+    .fields()
+    .setInclude({
+      doctor: true,
+      patient: true,
+      schedule: true,
+      payment: true,
+    });
+
+  const meta = await appointmentsQuery.countTotal();
+  const data = await appointmentsQuery.execute();
+
+  return { meta, data };
+};
+
+const changeAppointmentStatusIntoDB = async () => {};
+
 export const AppointmentServices = {
   createAppointmentIntoDB,
   getMyAppointmentsFromDB,
+  getAllAppointmentsFromDB,
+  changeAppointmentStatusIntoDB,
 };

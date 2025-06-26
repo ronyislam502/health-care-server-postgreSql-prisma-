@@ -3,7 +3,8 @@ import { TSchedule } from "./schedule.interface";
 import prisma from "../../shared/prisma";
 import { Schedule } from "@prisma/client";
 import HealthQueryBuilder from "../../builder/healthQuery";
-import QueryBuilder2 from "../../shared/queryBuilder2";
+import { convertDateTime } from "../../shared/convertTime";
+import { JwtPayload } from "jsonwebtoken";
 
 const createScheduleIntoDB = async (
   payload: TSchedule
@@ -33,10 +34,18 @@ const createScheduleIntoDB = async (
         Number(payload?.endTime.split(":")[1])
       )
     );
-    while (startDateTime <= endDateTime) {
+    while (startDateTime < endDateTime) {
+      // const scheduleData = {
+      //   startDateTime: startDateTime,
+      //   endDateTime: addMinutes(startDateTime, intervalTime),
+      // };
+
+      const s = await convertDateTime(startDateTime);
+      const e = await convertDateTime(addMinutes(startDateTime, intervalTime));
+
       const scheduleData = {
-        startDateTime: startDateTime,
-        endDateTime: addMinutes(startDateTime, intervalTime),
+        startDateTime: s,
+        endDateTime: e,
       };
 
       const isScheduleExist = await prisma.schedule.findFirst({
@@ -61,8 +70,28 @@ const createScheduleIntoDB = async (
   return schedules;
 };
 
-const getAllSchedulesFromDB = async (query: Record<string, unknown>) => {
-  const scheduleQuery = new QueryBuilder2(prisma.schedule, query)
+const getAllSchedulesFromDB = async (
+  user: JwtPayload,
+  query: Record<string, unknown>
+) => {
+  const isDoctorSchedule = await prisma.doctorSchedules.findMany({
+    where: {
+      doctor: {
+        email: user.email,
+      },
+    },
+  });
+
+  const doctorScheduleIds = isDoctorSchedule.map(
+    (schedule) => schedule.scheduleId
+  );
+
+  const updatedQuery = {
+    ...query,
+    excludeScheduleIds: doctorScheduleIds,
+  };
+
+  const scheduleQuery = new HealthQueryBuilder(prisma.schedule, updatedQuery)
     .filter()
     .sort()
     .paginate()

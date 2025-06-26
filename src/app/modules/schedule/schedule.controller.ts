@@ -15,13 +15,17 @@ const createSchedule = catchAsync(async (req, res) => {
 });
 
 const getAllSchedules = catchAsync(async (req, res) => {
-  const result = await ScheduleServices.getAllSchedulesFromDB(req.query);
+  const result = await ScheduleServices.getAllSchedulesFromDB(
+    req.user,
+    req.query
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: "Schedules retrieved Successfully",
-    data: result,
+    meta: result.meta,
+    data: result.data,
   });
 });
 
