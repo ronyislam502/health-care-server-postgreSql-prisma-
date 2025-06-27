@@ -17,7 +17,11 @@ router.get(
   AppointmentControllers.getMyAppointment
 );
 
-router.get("/", auth(UserRole.PATIENT), AppointmentControllers.allAppointments);
+router.get(
+  "/",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+  AppointmentControllers.allAppointments
+);
 
 router.patch(
   "/status/:appointmentId",
