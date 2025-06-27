@@ -2,6 +2,7 @@ import axios from "axios";
 import config from "../../config";
 import prisma from "../../shared/prisma";
 import { initialPayment } from "./payment.utils";
+import { PaymentStatus } from "@prisma/client";
 
 const createPaymentIntoDB = async (appointmentId: string) => {
   const isPayment = await prisma.payment.findFirstOrThrow({
@@ -30,9 +31,56 @@ const createPaymentIntoDB = async (appointmentId: string) => {
 
   const result = await initialPayment(paymentData);
 
-  //   console.log(result);
-
   return result;
 };
 
-export const PaymentServices = { createPaymentIntoDB };
+const validatePaymentFromDB = async (payload: any) => {
+  // if your server has production then use this uncomment but development purpose use local then comment
+
+  // if (!payload || !payload.status || !(payload.status === 'VALID')) {
+  //     return {
+  //         message: "Invalid Payment!"
+  //     }
+  // }
+
+  // const response = await SSLService.validatePayment(payload);
+
+  // if (response?.status !== 'VALID') {
+  //     return {
+  //         message: "Payment Failed!"
+  //     }
+  // }
+
+  // ----------------++++--------------//
+
+  const response = payload; // const response = payload; (if local server use development purpose then uncomment)
+
+  await prisma.$transaction(async (tx) => {
+    const updatedPaymentData = await tx.payment.update({
+      where: {
+        transactionId: response.tran_id,
+      },
+      data: {
+        status: PaymentStatus.PAID,
+        paymentGatewayData: response,
+      },
+    });
+    await tx.appointment.update({
+      where: {
+        id: updatedPaymentData.appointmentId,
+      },
+      data: {
+        paymentStatus: PaymentStatus.PAID,
+      },
+    });
+  });
+
+  return {
+    message: "payment success",
+  };
+};
+
+export const PaymentServices = {
+  createPaymentIntoDB,
+  validatePaymentFromDB,
+};

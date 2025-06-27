@@ -19,4 +19,10 @@ router.get(
 
 router.get("/", auth(UserRole.PATIENT), AppointmentControllers.allAppointments);
 
+router.patch(
+  "/status/:appointmentId",
+  auth(UserRole.DOCTOR, UserRole.ADMIN, UserRole.SUPER_ADMIN),
+  AppointmentControllers.changeAppointmentStatus
+);
+
 export const AppointmentRoutes = router;

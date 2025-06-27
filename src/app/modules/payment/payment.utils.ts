@@ -2,10 +2,11 @@ import axios from "axios";
 import dotenv from "dotenv";
 import AppError from "../../errors/AppError";
 import config from "../../config";
+import { TPaymentData } from "./payment.interface";
 
 dotenv.config();
 
-export const initialPayment = async (paymentData: any) => {
+export const initialPayment = async (paymentData: TPaymentData) => {
   try {
     const data = {
       store_id: config.ssl_store_id,
@@ -50,5 +51,18 @@ export const initialPayment = async (paymentData: any) => {
     return response?.data?.redirectGatewayURL;
   } catch (error) {
     throw new AppError(httpStatus.BAD_REQUEST, "Payment error occured!");
+  }
+};
+
+export const validatePayment = async (payload: any) => {
+  try {
+    const response = await axios({
+      method: "GET",
+      url: `${config.ssl_validation_api}?val_id=${payload.val_id}&store_id=${config.ssl_store_id}&store_passwd=${config.ssl_store_pass}&format=json`,
+    });
+
+    return response.data;
+  } catch (error) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Payment validate failed");
   }
 };
