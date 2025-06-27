@@ -38,6 +38,21 @@ const createDoctorSchema = z.object({
   }),
 });
 
+const updateDoctorSchema = z.object({
+  body: z.object({
+    name: z.string().optional(),
+    phone: z.string().optional(),
+    registrationNumber: z.string().optional(),
+    experience: z.number().optional(),
+    gender: z.string().optional(),
+    appointmentFee: z.number().optional(),
+    qualification: z.string().optional(),
+    currentWorkingPlace: z.string().optional(),
+    designation: z.string().optional(),
+  }),
+});
+
 export const DoctorValidations = {
   createDoctorSchema,
+  updateDoctorSchema,
 };

@@ -5,4 +5,6 @@ const router = Router();
 
 router.post("/create-review", ReviewControllers.createReview);
 
+router.get("/", ReviewControllers.allReviews);
+
 export const ReviewRoutes = router;
